@@ -46,6 +46,8 @@ const Signup = () => {
       return;
     }
   
+    setError("");
+    console.log("User created", user)
     try {
       const response = await fetch("http://localhost:5000/api/users/signup", {
         method: "POST",
@@ -59,9 +61,10 @@ const Signup = () => {
   
       const data = await response.json();
       if (response.ok) {
-        console.log("Signup successful:", data);
+        localStorage.setItem("otpEmail", user.email); // Save email for OTP
         router.push("/otp");
-      } else {
+      }
+       else {
         setErrors({ server: data.message || "Signup failed." });
       }
     } catch (err) {

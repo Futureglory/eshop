@@ -6,15 +6,11 @@ const User = sequelize.define("User", {
   username: { type: DataTypes.STRING, allowNull: false },
   email: { type: DataTypes.STRING, allowNull: false, unique: true },
   password: { type: DataTypes.STRING, allowNull: false },
-  // models/User.js
-
-otp: {
-  type: DataTypes.STRING,
-},
-otpExpiresAt: {
-  type: DataTypes.DATE,
-},
-
-}, { timestamps: true });
+  otp: { type: DataTypes.STRING },
+  otpExpiresAt: { type: DataTypes.DATE },
+  isVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
+}, {
+  timestamps: true,
+});
 
 module.exports = User;
