@@ -11,7 +11,7 @@ const Signup = () => {
      password: "",
       confirmPassword: ""
      });
-  const [errors, setErrors] = useState({});
+  const [error, setError] = useState({});
 
   const handleChange = (e) => {
     setUser({ ...user, [e.target.name]: e.target.value });
@@ -42,7 +42,7 @@ const Signup = () => {
     }
   
     if (Object.keys(validationErrors).length > 0) {
-      setErrors(validationErrors);
+      setError(validationErrors);
       return;
     }
   
@@ -61,14 +61,13 @@ const Signup = () => {
   
       const data = await response.json();
       if (response.ok) {
-        localStorage.setItem("otpEmail", user.email); // Save email for OTP
-        router.push("/otp");
+        router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
       }
        else {
-        setErrors({ server: data.message || "Signup failed." });
+        setError({ server: data.message || "Signup failed." });
       }
     } catch (err) {
-      setErrors({ server: "Something went wrong. Please try again." });
+      setError({ server: "Something went wrong. Please try again." });
     }
   };
   
@@ -78,16 +77,16 @@ const Signup = () => {
       <h2>Sign Up</h2>
       <form onSubmit={handleSubmit}>
         <input type="text" name="username" placeholder="Username" value={user.username} onChange={handleChange} />
-        {errors.username && <p>{errors.username}</p>}
+        {error.username && <p>{error.username}</p>}
 
         <input type="email" name="email" placeholder="Email" value={user.email} onChange={handleChange} />
-        {errors.email && <p>{errors.email}</p>}
+        {error.email && <p>{error.email}</p>}
 
         <input type="password" name="password" placeholder="Password" value={user.password} onChange={handleChange} />
-        {errors.password && <p>{errors.password}</p>}
+        {error.password && <p>{error.password}</p>}
 
         <input type="password" name="confirmPassword" placeholder="Confirm Password" value={user.confirmPassword} onChange={handleChange} />
-        {errors.confirmPassword && <p>{errors.confirmPassword}</p>}
+        {error.confirmPassword && <p>{error.confirmPassword}</p>}
 
         <button type="submit">Register</button>
       </form>

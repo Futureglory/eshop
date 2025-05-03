@@ -13,8 +13,30 @@ app.use(express.json());
 app.use("/api/users", userRoutes);
 
 // Sync Database & Start Server
-sequelize.sync()
+sequelize.authenticate()
+  .then(() => {
+    console.log("Database connected successfully");
+    return sequelize.sync();
+  })
   .then(() => {
     app.listen(5000, () => console.log("Server running on port 5000"));
   })
-  .catch(err => console.error("Database sync error:", err));
+  .catch((err) => {
+    console.error("Database connection error:", err);
+  });
+
+// Error Handling Middleware
+app.use((err, req, res, next) => {
+  console.error("Error: ", err);
+  res.status(err.status || 500).json({ message: err.message || "Internal Server Error" });
+});
+
+// Handle Unexpected Errors
+process.on("uncaughtException", (err) => {
+  console.error("Uncaught Exception: ", err);
+  process.exit(1);
+});
+
+process.on("unhandledRejection", (reason) => {
+  console.error("Unhandled Promise Rejection: ", reason);
+});

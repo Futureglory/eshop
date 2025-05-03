@@ -6,7 +6,8 @@ import axios from 'axios';
 const OtpVerification = () => {
   const searchParams = useSearchParams();
   const email = searchParams.get('email'); // Get email from query params
-  const [otp, setOtp] = useState(["", "", "", "", ""]); // Proper OTP state
+  const [otp, setOtp] = useState(["", "", "", "", ""]); 
+    // Proper OTP state
   const [message, setMessage] = useState("");
   const [resendMessage, setResendMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -30,6 +31,7 @@ const OtpVerification = () => {
     e.preventDefault();
     setLoading(true);
     setMessage('');
+    setError('');
     const fullOtp = otp.join(''); // Join OTP array into a string
 
     try {
@@ -42,8 +44,8 @@ const OtpVerification = () => {
     }
   };
 
-  // Handle OTP resend
-  const handleResend = async () => {
+   // Handle OTP resend
+   const handleResend = async () => {
     setResendMessage('');
     try {
       const response = await fetch('http://localhost:5000/api/users/resend-otp', {
@@ -58,6 +60,7 @@ const OtpVerification = () => {
       setResendMessage('❌ Something went wrong. Try again.');
     }
   };
+
 
   return (
     <div className="otp-container">

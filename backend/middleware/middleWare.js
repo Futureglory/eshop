@@ -13,3 +13,7 @@ export function middleware(request) {
 
   return NextResponse.next();
 }
+
+export const config = {
+  matcher: ['/profile'], // Applies middleware to '/profile' route
+};

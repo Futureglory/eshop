@@ -24,6 +24,11 @@ const sendOTPEmail = async (email, otp) => {
 const signup = async (req, res) => {
   try {
     const { username, email, password } = req.body;
+    const existingUser = await User.findOne({ where: { email } });
+    if (existingUser) {
+      return res.status(400).json({ message: 'Email already in use' });
+    }
+
     const hashedPassword = await bcrypt.hash(password, 10);
 
     const otpGenerator = require("otp-generator");
@@ -38,8 +43,15 @@ const signup = async (req, res) => {
     // Send OTP email
     res.status(201).json({ message: "Signup successful! OTP sent to email.", user: newUser });
   } catch (error) {
-    res.status(500).json({ message: "Signup failed.", error });
+    console.error("Signup Error:", error);
+    res.status(500).json({ message: "Signup failed.Please try again later.", error });
   }
+  res.cookie("signup_data", JSON.stringify({ email: user.email }), {
+    httpOnly: true, // Prevent client-side access
+    secure: true, // Works only on HTTPS
+    maxAge: 10 * 60 * 1000, // Expires in 10 minutes
+  });
+  res.status(201).json({ message: "Signup successful!" });
 };
 
 const login = async (req, res) => {
@@ -55,7 +67,13 @@ const login = async (req, res) => {
       expiresIn: "1d",
     });
 
-    res.status(200).json({ message: "Login successful!", user });
+    // Store token in HTTP-only cookie
+res.cookie("token", token, { httpOnly: true, secure: true, maxAge: 24 * 60 * 60 * 1000 });
+
+    res.status(200).json({ message: "Login successful!", 
+      token,
+      user:{id: user.id, username: user.username, email: user.email}
+     });
   } catch (error) {
     res.status(500).json({ message: "Login failed.", error });
   }
@@ -79,8 +97,12 @@ const getUserProfile = async (req, res) => {
   try{
     const user = await User.findOne({ where: { email } });
 
+    if (!user) {
+      return res.status(404).json({ message: "User not found" });
+    }
+    
     if (!user || user.otp !== otp || user.otpExpiresAt < new Date()) {
-      return res.status(400).json({ message: "Invalid or expired OTP" });
+      return res.status(400).json({ message: " OTP expired. Request a new one" });
     }
   
     user.isVerified = true;
@@ -90,7 +112,8 @@ const getUserProfile = async (req, res) => {
   
     res.status(200).json({ message: "OTP verified successfully" });
   } catch (error) {
-    res.status(500).json({ message: "Verification failed.", error });
+    console.error("OTP Verification Error:", error);
+    res.status(500).json({ message: " Verification failed. Please try again." });
   }
   };
   
@@ -101,12 +124,15 @@ const getUserProfile = async (req, res) => {
   
     if (!user) return res.status(404).json({ message: "User not found" });
   
+    if (user.otpExpiresAt > new Date()) {
+      return res.status(400).json({ message: "Wait a few minutes before requesting a new OTP." });
+    }
+
     const otp = Math.floor(100000 + Math.random() * 900000);
     const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
 
     user.otp = otp;
-    user.otpExpiresAt = Date.now() + 10 * 60 * 1000;
-    await user.save();
+    user.otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000);     await user.save();
   
     await sendOTPEmail(email, otp);
 
