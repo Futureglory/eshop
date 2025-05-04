@@ -23,11 +23,14 @@ const sendOTPEmail = async (email, otp) => {
 
 const signup = async (req, res) => {
   try {
-    const { username, email, password } = req.body;
+    const { username, email, password, termsAccepted } = req.body;
     const existingUser = await User.findOne({ where: { email } });
     if (existingUser) {
       return res.status(400).json({ message: 'Email already in use' });
     }
+    if (!termsAccepted) {
+      return res.status(400).json({ message: "You must accept the Terms & Conditions." });
+    }  
 
     const hashedPassword = await bcrypt.hash(password, 10);
 
@@ -143,7 +146,34 @@ const getUserProfile = async (req, res) => {
   }
   };
   
+  const updateProfile = async (req, res) => {
+    try {
+      const { username, email } = req.body;
+      const user = await User.findByPk(req.user.id);
+  
+      if (!user) return res.status(404).json({ message: "User not found." });
+  
+      if (username?.trim().length < 3) return res.status(400).json({ message: "Username must be at least 3 characters." });
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) return res.status(400).json({ message: "Invalid email format." });
+  
+      user.username = username || user.username;
+      user.email = email || user.email;
+      await user.save();
+  
+      res.status(200).json({ message: "Profile updated successfully!", user });
+    } catch (error) {
+      console.error("Profile update error:", error);
+      res.status(500).json({ message: "Failed to update profile." });
+    }
+  };
 
-  module.exports = { signup, login, getUserProfile, verifyOtp, resendOtp };
-  // module.exports = { signup, login, getUserProfile, verifyOtp, resendOtp };
+  module.exports = {
+    signup,
+    login,
+    getUserProfile,
+    verifyOtp,
+    resendOtp,
+    updateProfile
+  };
+    // module.exports = { signup, login, getUserProfile, verifyOtp, resendOtp };
   

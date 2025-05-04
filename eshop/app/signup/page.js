@@ -1,51 +1,57 @@
 'use client'
 import { useState } from "react";
 import { useRouter } from "next/navigation";
-<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
 
 const Signup = () => {
   const router = useRouter();
   const [user, setUser] = useState({
-     username: "", 
-     email: "", 
-     password: "",
-      confirmPassword: ""
-     });
+    username: "",
+    email: "",
+    password: "",
+    confirmPassword: "",
+    termsAccepted: false,
+  });
   const [error, setError] = useState({});
 
   const handleChange = (e) => {
-    setUser({ ...user, [e.target.name]: e.target.value });
+    const { name, value, type, checked } = e.target;
+    setUser({ ...user, [name]: type === "checkbox" ? checked : value });
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     let validationErrors = {};
-  
+
     // Username validation
     if (user.username.trim().length < 3) {
       validationErrors.username = "Username must be at least 3 characters long.";
     }
-  
+
     // Email validation
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(user.email)) {
       validationErrors.email = "Invalid email address.";
     }
-  
+
     // Password validation
     if (user.password.length < 8) {
       validationErrors.password = "Password must be at least 8 characters long.";
     }
-  
+
     // Confirm Password validation
     if (user.password !== user.confirmPassword) {
       validationErrors.confirmPassword = "Passwords do not match.";
     }
-  
+    if (!user.termsAccepted) {
+      validationErrors.terms = "You must accept the Terms & Conditions.";
+    }
+    
+
     if (Object.keys(validationErrors).length > 0) {
       setError(validationErrors);
       return;
     }
-  
+
     setError("");
     console.log("User created", user)
     try {
@@ -56,21 +62,22 @@ const Signup = () => {
           username: user.username,
           email: user.email,
           password: user.password,
+          termsAccepted: user.termsAccepted,
         }),
       });
-  
+
       const data = await response.json();
       if (response.ok) {
         router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
       }
-       else {
+      else {
         setError({ server: data.message || "Signup failed." });
       }
     } catch (err) {
       setError({ server: "Something went wrong. Please try again." });
     }
   };
-  
+
 
   return (
     <div className="signup-container">
@@ -87,6 +94,17 @@ const Signup = () => {
 
         <input type="password" name="confirmPassword" placeholder="Confirm Password" value={user.confirmPassword} onChange={handleChange} />
         {error.confirmPassword && <p>{error.confirmPassword}</p>}
+
+        <label className="terms-label">
+          <input 
+          type="checkbox"
+          name="termsAccepted" 
+          onChange={handleChange}
+           required
+            />
+          I accept the <a href="/terms">Terms & Conditions</a>.
+        </label>
+        {error.terms && <p className="error-message">{error.terms}</p>}
 
         <button type="submit">Register</button>
       </form>

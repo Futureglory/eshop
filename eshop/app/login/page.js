@@ -71,7 +71,7 @@ const Login = () => {
       ) : (
         <h2>Welcome!</h2>
       )}
-         <p> login to continue.</p>
+         {/* <p> login to continue.</p> */}
 
       <form onSubmit={handleSubmit}>
         <input
