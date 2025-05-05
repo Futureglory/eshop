@@ -30,32 +30,39 @@ const signup = async (req, res) => {
     }
     if (!termsAccepted) {
       return res.status(400).json({ message: "You must accept the Terms & Conditions." });
-    }  
+    }
 
     const hashedPassword = await bcrypt.hash(password, 10);
-
-    const otpGenerator = require("otp-generator");
-
     const otp = Math.floor(100000 + Math.random() * 900000);
-    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes from now
+    const otpExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
 
-    const newUser = await User.create({ username, email, password: hashedPassword,otp, otpExpiresAt,
+    const newUser = await User.create({
+      username,
+      email,
+      password: hashedPassword,
+      otp,
+      otpExpiresAt,
       isVerified: false,
     });
+
     await sendOTPEmail(email, otp);
-    // Send OTP email
-    res.status(201).json({ message: "Signup successful! OTP sent to email.", user: newUser });
+
+    res.cookie("signup_data", JSON.stringify({ email: newUser.email }), {
+      httpOnly: true,
+      secure: true,
+      maxAge: 10 * 60 * 1000,
+    });
+
+    return res.status(201).json({
+      message: "Signup successful! OTP sent to email.",
+      user: newUser,
+    });
   } catch (error) {
     console.error("Signup Error:", error);
-    res.status(500).json({ message: "Signup failed.Please try again later.", error });
+    return res.status(500).json({ message: "Signup failed. Please try again later." });
   }
-  res.cookie("signup_data", JSON.stringify({ email: user.email }), {
-    httpOnly: true, // Prevent client-side access
-    secure: true, // Works only on HTTPS
-    maxAge: 10 * 60 * 1000, // Expires in 10 minutes
-  });
-  res.status(201).json({ message: "Signup successful!" });
 };
+
 
 const login = async (req, res) => {
   try {
@@ -167,13 +174,69 @@ const getUserProfile = async (req, res) => {
     }
   };
 
+
+  const resetPasswordRequest = async (req, res) => {
+    const { email } = req.body;
+    try {
+      const user = await User.findOne({ where: { email } });
+      if (!user) return res.status(404).json({ message: "User not found." });
+  
+      const resetToken = user.generatePasswordResetToken();
+      await user.save();
+  
+      const resetURL = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&email=${email}`;
+  
+      await sendEmail({
+        to: email,
+        subject: "Password Reset Request",
+        text: `You requested a password reset. Click this link to reset: ${resetURL}`,
+      });
+  
+      res.status(200).json({ message: "Reset link sent to email." });
+    } catch (error) {
+      console.error("Password reset error:", error);
+      res.status(500).json({ message: "Could not send reset email." });
+    }
+  };
+  
+
+  const crypto = require("crypto");
+
+const resetPassword = async (req, res) => {
+  const { email, token, newPassword } = req.body;
+  const hashedToken = crypto.createHash("sha256").update(token).digest("hex");
+
+  try {
+    const user = await User.findOne({
+      where: {
+        email,
+        passwordResetToken: hashedToken,
+        passwordResetExpires: { [Op.gt]: new Date() },
+      },
+    });
+
+    if (!user) return res.status(400).json({ message: "Invalid or expired token." });
+
+    user.password = await bcrypt.hash(newPassword, 10);
+    user.passwordResetToken = null;
+    user.passwordResetExpires = null;
+    await user.save();
+
+    res.status(200).json({ message: "Password reset successful." });
+  } catch (error) {
+    res.status(500).json({ message: "Reset failed.", error });
+  }
+};
+
   module.exports = {
     signup,
     login,
     getUserProfile,
     verifyOtp,
     resendOtp,
-    updateProfile
+    updateProfile,
+    resetPasswordRequest,
+    resetPassword,
   };
     // module.exports = { signup, login, getUserProfile, verifyOtp, resendOtp };
   

@@ -12,6 +12,8 @@ app.use(express.json());
 // Routes
 app.use("/api/users", userRoutes);
 
+app.use('/api/auth', require('./routes/authRoutes'));
+
 // Sync Database & Start Server
 sequelize.authenticate()
   .then(() => {

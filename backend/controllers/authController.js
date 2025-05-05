@@ -3,9 +3,36 @@ const nodemailer = require("nodemailer");
 const bcrypt = require("bcrypt");
 const jwt = require("jsonwebtoken");
 const User = require("../models/User");
+const generateOTP = require("../utils/generateOTP");
+const sendEmail = require("../utils/sendEmail");
+const { blacklist } = require("../middleware/authMiddleware");
+
+exports.signup = async (req, res) => {
+  const { username, email, password } = req.body;
+
+  try {
+    const existing = await User.findOne({ where: { email } });
+    if (existing) return res.status(400).json({ message: "Email already exists" });
+
+    const otp = generateOTP();
+    const newUser = await User.create({
+      username,
+      email,
+      password, // make sure you hash this!
+      otp,
+      isVerified: false,
+    });
+
+    await sendEmail(email, "Your OTP Code", `Your OTP is: ${otp}`);
+    res.status(201).json({ message: "Signup successful. Please verify your email." });
+  } catch (err) {
+    res.status(500).json({ message: "Signup failed", error: err.message });
+  }
+};
+
 exports.login = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password, remember } = req.body;
     const user = await User.findOne({ where: { email } });
 
     if (!user) {
@@ -17,8 +44,14 @@ exports.login = async (req, res) => {
       return res.status(401).json({ message: "Invalid password." });
     }
 
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, { expiresIn: remember? "30d" : "1h" });
 
+    es.cookie("token", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production",
+      maxAge: remember ? 30 * 24 * 60 * 60 * 1000 : 60 * 60 * 1000, // 30d vs 1h
+    });
+    
     res.status(200).json({
       message: "Login successful!",
       token,
@@ -29,11 +62,6 @@ exports.login = async (req, res) => {
     res.status(500).json({ message: "Login failed." });
   }
 };
-
-exports.logout = (req, res) => {
-  res.status(200).json({ message: "Logout successful!" });
-};
-
 exports.requestPasswordReset = async (req, res) => {
   try {
     const { email } = req.body;
@@ -90,7 +118,67 @@ exports.resetPassword = async (req, res) => {
   }
 };
 
-const blacklist = new Set(); // Store blacklisted tokens in-memory
+// const blacklist = new Set(); 
+
+exports.verifyOTP = async (req, res) => {
+  const { email, otp } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user || user.otp !== otp) {
+      return res.status(400).json({ message: "Invalid OTP or user." });
+    }
+
+    user.isVerified = true;
+    user.otp = null;
+    await user.save();
+
+    res.status(200).json({ message: "Email verified successfully." });
+  } catch (err) {
+    res.status(500).json({ message: "OTP verification failed", error: err.message });
+  }
+};
+
+exports.resendOTP = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const newOTP = generateOTP();
+    user.otp = newOTP;
+    await user.save();
+
+    await sendEmail(email, "Resend OTP", `Your new OTP is: ${newOTP}`);
+    res.status(200).json({ message: "OTP resent successfully" });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to resend OTP", error: err.message });
+  }
+};
+
+exports.forgotPassword = async (req, res) => {
+  const { email } = req.body;
+
+  try {
+    const user = await User.findOne({ where: { email } });
+    if (!user) return res.status(404).json({ message: "User not found" });
+
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const tokenExpiry = Date.now() + 3600000; // 1 hour
+
+    user.resetToken = resetToken;
+    user.resetTokenExpires = tokenExpiry;
+    await user.save();
+
+    const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}&email=${email}`;
+    await sendEmail(email, "Reset Password", `Reset here: ${resetUrl}`);
+
+    res.status(200).json({ message: "Reset link sent to your email." });
+  } catch (err) {
+    res.status(500).json({ message: "Failed to send reset email", error: err.message });
+  }
+};
 
 exports.logout = async (req, res) => {
   try {
@@ -106,16 +194,16 @@ exports.logout = async (req, res) => {
   }
 };
 
-exports.authMiddleware = (req, res, next) => {
-  const token = req.headers.authorization?.split(" ")[1];
-  if (!token || blacklist.has(token)) {
-    return res.status(401).json({ message: "Invalid or expired token." });
-  }
+// exports.authMiddleware = (req, res, next) => {
+//   const token = req.headers.authorization?.split(" ")[1];
+//   if (!token || blacklist.has(token)) {
+//     return res.status(401).json({ message: "Invalid or expired token." });
+//   }
 
-  try {
-    req.user = jwt.verify(token, process.env.JWT_SECRET);
-    next();
-  } catch (error) {
-    res.status(401).json({ message: "Invalid token." });
-  }
-};
+//   try {
+//     req.user = jwt.verify(token, process.env.JWT_SECRET);
+//     next();
+//   } catch (error) {
+//     res.status(401).json({ message: "Invalid token." });
+//   }
+// };

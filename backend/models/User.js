@@ -1,5 +1,6 @@
 const { DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
+const crypto = require("crypto");
 
 const User = sequelize.define("User", {
   id: { type: DataTypes.INTEGER, autoIncrement: true, primaryKey: true },
@@ -15,11 +16,28 @@ const User = sequelize.define("User", {
   otp: { type: DataTypes.INTEGER, allowNull: true },
   otpExpiresAt: { type: DataTypes.DATE },
   isVerified: { type: DataTypes.BOOLEAN, defaultValue: false },
+passwordResetToken: {
+  type: DataTypes.STRING,
+  allowNull: true,
+},
+passwordResetExpires: {
+  type: DataTypes.DATE,
+  allowNull: true,
+},
 }, {
   timestamps: true,
 });
 User.beforeCreate(async (user) => {
   const bcrypt = require("bcrypt");
   user.password = await bcrypt.hash(user.password, 10);
+
+  User.prototype.generatePasswordResetToken = function () {
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+  
+    this.passwordResetToken = hashedToken;
+    this.passwordResetExpires = new Date(Date.now() + 10 * 60 * 1000); // 10 minutes
+    return resetToken;
+  };
 });
 module.exports = User;
