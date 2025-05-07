@@ -1,24 +1,28 @@
+// routes/authRoutes.js
 const express = require("express");
-const router = express.Router(); // ✅ Don't forget this line!
-const { authMiddleware, protect } = require("../middleware/authMiddleware"); // Ensure logout security
-const { 
-  login, 
+const router = express.Router();
+const {
   signup,
- verifyOTP, 
- resendOTP, 
- forgotPassword, 
- resetPassword,
- requestPasswordReset, 
- logout 
-} = require("../controllers/authController.js");
+  login,
+  verifyOtp,
+  resendOtp,
+  forgotPassword,
+  requestPasswordReset,
+  resetPassword,
+  logout,
+} = require("../controllers/authController");
+const { authMiddleware } = require("../middleware/authMiddleware");
 
+// Auth & OTP
+router.post("/signup", signup);
 router.post("/login", login);
+router.post("/logout", authMiddleware, logout);
+router.post("/otp", verifyOtp);
+router.post("/resend-otp", resendOtp);
+
+// Password Reset
+router.post("/forgot-password", forgotPassword);
 router.post("/request-reset", requestPasswordReset);
 router.post("/reset-password", resetPassword);
-router.post("/logout", authMiddleware, logout);
-router.post("/signup", signup);
-router.post("/verify-otp", verifyOTP);
-router.post("/resend-otp", resendOTP);
-router.post("/forgot-password", forgotPassword);
 
 module.exports = router;

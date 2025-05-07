@@ -4,6 +4,7 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react"; // 👈 Add this
 import Link from "next/link";
+const cookieParser = require('cookie-parser');
 
 const Login = () => {
   const router = useRouter();
@@ -29,8 +30,14 @@ const Login = () => {
       const response = await fetch("http://localhost:5000/api/users/login", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(credentials),
+        credentials: "include",
+        body: JSON.stringify({
+          email: credentials.email,
+          password: credentials.password
+        }),
+      
       });
+
       const data = await response.json();
       if (response.ok) {
         document.cookie = `token=${data.token};path=/;`;
@@ -45,35 +52,32 @@ const Login = () => {
 
 
   const fetchProfile = async () => {
-    const token = document.cookie.split("; ").find(row => row.startsWith("token="))?.split("=")[1];
-
-    if (!token) {
-      console.warn("No token found, skipping profile fetch.");
-      return;
-    }
-
     try {
       const response = await fetch("http://localhost:5000/api/users/profile", {
-        headers: { Authorization: `Bearer ${token}` },
+        method: "GET",
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${token}`, // Replace with actual token
+        },
+        credentials: "include", // Send cookie with request
       });
 
-      const data = await response.json();
-      if (response.ok) {
-        setUser(data.user);
-      } else {
-        console.warn("Error fetching profile:", data.message);
-      }
-    } catch (err) {
-      console.error("Failed to fetch user profile:", err);
+      if (!res.ok) throw new Error("Failed to fetch profile");
+  
+      const data = await res.json();
+      console.log(data);
+    } catch (error) {
+      console.error("Error fetching profile:", error.message);
     }
   };
+  
 
 
   return (
     <div className="login-container">
       <h1>Login</h1>
       {user?.isVerified ? (
-        <h2>Welcome, {user.username}!</h2>
+        <h2>Welcome, {username}!</h2>
       ) : (
         <h2>Welcome!</h2>
       )}

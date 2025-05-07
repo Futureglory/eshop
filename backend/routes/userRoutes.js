@@ -1,24 +1,27 @@
+// routes/userRoutes.js
 const express = require("express");
+const router = express.Router();
 const {
-  signup,
-  login,
   getUserProfile,
-  verifyOtp,
-  resendOtp,
   updateProfile,
-} = require("../controllers/userController");
-const {authMiddleware, protect} = require("../middleware/authMiddleware");
-const { resetPassword } = require('../controllers/authController');
+  updatePassword
 
+} = require("../controllers/authController");
+const { authMiddleware } = require("../middleware/authMiddleware");
 
-const router = express.Router(); // ✅ Don't forget this line!
+// Protected profile routes
+router.get("/profile", authMiddleware, getUserProfile);
+router.put("/profile", authMiddleware, updateProfile);
+router.put("/profile", authMiddleware, updatePassword);
 
 router.post("/signup", signup);
 router.post("/login", login);
-router.get("/profile", authMiddleware, getUserProfile);
-router.put("/profile", authMiddleware, updateProfile);
-router.post("/resend-otp", resendOtp);
+router.post("/logout", authMiddleware, logout);
 router.post("/otp", verifyOtp);
-router.post('/reset-password', resetPassword);
+router.post("/resend-otp", resendOtp);
+router.post("/forgot-password", forgotPassword);
+router.post("/request-reset", requestPasswordReset);
+router.post("/reset-password", resetPassword);
+
 
 module.exports = router;

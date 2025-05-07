@@ -2,7 +2,6 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react";
-<link href="https://fonts.googleapis.com/css2?family=Poppins&display=swap" rel="stylesheet" />
 import Link from "next/link";
 
 const Signup = () => {
@@ -26,6 +25,7 @@ const Signup = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     let validationErrors = {};
+
 
     // Username validation
     if (user.username.trim().length < 3) {
@@ -71,9 +71,10 @@ const Signup = () => {
       });
 
       const data = await response.json();
+      console.log("Response from backend:", data); // ✅ Add this line
       if (response.ok) {
-        router.push(`/verify-otp?email=${encodeURIComponent(email)}`);
-      }
+        console.log("Routing to verify OTP...");
+        router.push(`/otp?email=${encodeURIComponent(user.email)}`);      }
       else {
         setError({ server: data.message || "Signup failed." });
       }

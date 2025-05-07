@@ -1,18 +1,27 @@
 const express = require("express");
 const cors = require("cors");
 const sequelize = require("./config/database");
-const userRoutes = require("./routes/userRoutes");
+const userRoutes = require("./routes/authRoutes");
 require("dotenv").config();
+const cookieParser = require('cookie-parser');
+const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 
-app.use(cors());
+app.use(cors({
+  origin: 'http://localhost:3000', // explicitly specify your frontend origin
+  credentials: true // allow cookies or authorization headers
+}));
+
 app.use(express.json());
+app.use(cookieParser()); // Middleware to parse cookies
 
 // Routes
 app.use("/api/users", userRoutes);
 
-app.use('/api/auth', require('./routes/authRoutes'));
+app.use('/api/auth', authRoutes);
+
+
 
 // Sync Database & Start Server
 sequelize.authenticate()

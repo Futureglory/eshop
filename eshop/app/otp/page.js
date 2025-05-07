@@ -2,11 +2,11 @@
 import { useState } from "react";
 import { useRouter, useSearchParams } from 'next/navigation';
 import axios from 'axios';
-
+// import {useRouter} from "next/router"
 const OtpVerification = () => {
   const searchParams = useSearchParams();
   const email = searchParams.get('email'); // Get email from query params
-  const [otp, setOtp] = useState(["", "", "", "", ""]); 
+  const [otp, setOtp] = useState(["", "", "", "", "",""]); 
     // Proper OTP state
   const [message, setMessage] = useState("");
   const [resendMessage, setResendMessage] = useState('');

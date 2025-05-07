@@ -26,35 +26,31 @@ const authMiddleware = (req, res, next) => {
 
 // Middleware for protecting routes (with user lookup)
 const protect = async (req, res, next) => {
-  let token;
+  const token = req.cookies.token;
 
-  if (
-    req.headers.authorization &&
-    req.headers.authorization.startsWith("Bearer")
-  ) {
-    token = req.headers.authorization.split(" ")[1];
-
-    if (blacklist.has(token)) {
-      return res.status(401).json({ message: "Token has been blacklisted." });
-    }
-
-    try {
-      const decoded = jwt.verify(token, process.env.JWT_SECRET);
-      const user = await User.findByPk(decoded.id);
-
-      if (!user) {
-        return res.status(404).json({ message: "User not found." });
-      }
-
-      req.user = user;
-      next();
-    } catch (err) {
-      return res.status(401).json({ message: "Not authorized, token failed." });
-    }
-  } else {
+  if (!token) {
     return res.status(401).json({ message: "Not authorized, no token." });
   }
+
+  if (blacklist.has(token)) {
+    return res.status(401).json({ message: "Token has been blacklisted." });
+  }
+
+  try {
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findByPk(decoded.id);
+
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    req.user = user;
+    next();
+  } catch (err) {
+    return res.status(401).json({ message: "Not authorized, token failed." });
+  }
 };
+
 
 // Export both middlewares and the blacklist (if needed in logout)
 module.exports = {
