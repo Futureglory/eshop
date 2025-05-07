@@ -41,23 +41,23 @@ exports.signup = async (req, res) => {
       otpExpiresAt,
     });
 
-await sendEmail(
-  email,
-  "OTP Verification",
-  `<p>Your OTP is: <b>${otp}</b>. It will expire in 10 minutes.</p>`
-);
-        res.status(201).json({ message: "Signup successful. Check your email for the OTP." });
-  } catch (err) {
-    console.error(err);
+    await sendEmail(
+      email,
+      "OTP Verification",
+      `<p>Your OTP is: <b>${otp}</b>. It will expire in 10 minutes.</p>`
+    );
+return res.status(201).json({ message: "Signup successful. Check your email for the OTP." });
+  } catch (error) {
+    console.error("signup error", error);
     res.status(500).json({ message: "Server error" });
   }
   if (error.name === 'SequelizeUniqueConstraintError') {
     return res.status(400).json({ message: 'Email already in use.' });
   }
   const existingUser = await User.findOne({ where: { email } });
-if (existingUser) {
-  return res.status(400).json({ message: 'Email already registered' });
-}
+  if (existingUser) {
+    return res.status(400).json({ message: 'Email already registered' });
+  }
 
 };
 
@@ -103,7 +103,7 @@ exports.resendOtp = async (req, res) => {
       "Resend OTP",
       `<p>Your new OTP is: <b>${otp}</b>. It will expire in 10 minutes.</p>`
     );
-        res.status(200).json({ message: "New OTP sent" });
+    res.status(200).json({ message: "New OTP sent" });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
@@ -113,20 +113,36 @@ exports.resendOtp = async (req, res) => {
 exports.login = async (req, res) => {
   try {
     const { email, password } = req.body;
+    console.log("Received login request:", email, password);
+    if (!email || !password) {
+      return res.status(400).json({ message: "Email and password required" });
+    }
+    console.log("Login attempt for:", email);
+
     const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(400).json({ message: "Invalid email or password" });
+    console.log("User found:", user);
+    if (!user) return res.status(404).json({ message: "User not found" });
+    console.log("Stored password:", user.password);
+    console.log("Entered password:", password);
+
 
     const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Invalid email or password" });
+    if (!isMatch) return res.status(401).json({ message: "Invalid email or password" });
 
     if (!user.isVerified) return res.status(401).json({ message: "Please verify your email first" });
 
-    const token = generateToken(user.id);
-    setTokenCookie(res, token);
+    // const token = generateToken(user.id);
 
-    res.status(200).json({ message: "Login successful" });
-  } catch (err) {
-    console.error(err);
+    // res.cookie("token", token, {
+    //   httpOnly: true,
+    //   secure: process.env.NODE_ENV === "production", // true in prod, false in dev
+    //   sameSite: "strict",
+    //   maxAge: 24 * 60 * 60 * 1000, // 1 day
+    // });
+
+    return res.status(200).json({ message: "Login successful", user: { id: user.id, email: user.email } });
+  } catch (error) {
+    console.error(error);
     res.status(500).json({ message: "Server error" });
   }
 };
@@ -156,7 +172,7 @@ exports.forgotPassword = async (req, res) => {
       "Password Reset",
       `<p>Reset your password using the link below:</p><a href="${resetURL}">${resetURL}</a><p>This link will expire in 10 minutes.</p>`
     );
-    
+
     res.status(200).json({ message: "Password reset email sent" });
   } catch (err) {
     console.error(err);
@@ -186,38 +202,42 @@ exports.resetPassword = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   }
 
-  const sendEmail = require("./sendEmail");
-
-const sendPasswordResetEmail = async (userEmail, resetLink) => {
-  const message = `Hello,
+  const sendPasswordResetEmail = async (userEmail, resetLink) => {
+    const message = `Hello,
 
 You have requested a password reset. Please click the link below to reset your password:
 ${resetLink}
 
 If you did not request this, please ignore this email.`;
 
-  await sendEmail({
-    to: userEmail,
-    subject: "Password Reset Request",
-    text: message,
-    // html: `<p>${message}</p>`, // Optionally, use HTML content
-  });
-};
+    await sendEmail({
+      to: userEmail,
+      subject: "Password Reset Request",
+      text: message,
+      // html: `<p>${message}</p>`, // Optionally, use HTML content
+    });
+  };
 };
 
 exports.getUserProfile = async (req, res) => {
   try {
-    const user = await User.findByPk(req.user.id, {
+    const token = req.cookies.token;
+    if (!token) return res.status(401).json({ message: "No token provided" });
+
+    const decoded = jwt.verify(token, process.env.JWT_SECRET);
+    const user = await User.findByPk(decoded.id, {
       attributes: ["id", "username", "email", "isVerified"]
     });
+
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    res.status(200).json(user);
+    res.status(200).json({ user });
   } catch (err) {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
+    res.status(401).json({ message: "Invalid token" });
   }
 };
+
 exports.updateProfile = async (req, res) => {
   try {
     const { username, email } = req.body;

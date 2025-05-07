@@ -2,11 +2,22 @@
 const express = require("express");
 const router = express.Router();
 const {
+  signup,
+  verifyOtp,
+  resendOtp,
+  forgotPassword,
+  requestPasswordReset,
+  resetPassword,
+  login,
+  logout,
+  // Profile routes 
+
   getUserProfile,
   updateProfile,
   updatePassword
 
 } = require("../controllers/authController");
+
 const { authMiddleware } = require("../middleware/authMiddleware");
 
 // Protected profile routes

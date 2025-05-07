@@ -16,18 +16,11 @@ const Profile = () => {
 
   const fetchProfile = async () => {
     try {
-      const token = document.cookie.split("; ").find(row => row.startsWith("token="))?.split("=")[1];
-
-      if (!token) {
-        router.push("/login");
-        return;
-      }
-
-      const response = await fetch("http://localhost:5000/profile", {
-        headers: { Authorization: `Bearer ${token}` },
-        credentials: "include",
+      const response = await fetch("http://localhost:5000/api/users/profile", {
+      method: POST,
+        credentials: "include", // send cookies!
       });
-
+  
       const data = await response.json();
       if (response.ok) setUser(data.user);
       else setError("Failed to load profile.");
@@ -54,8 +47,8 @@ const Profile = () => {
 
       const response = await fetch("http://localhost:5000/api/users/profile", {
         method: "PUT",
-        headers: { Authorization: `Bearer ${token}` },
         body: formData,
+        credentials: "include"
       });
 
       const data = await response.json();
@@ -73,14 +66,12 @@ const Profile = () => {
   // Logout function (Clears token cookie)
   const handleLogout = async () => {
     try {
-      const token = document.cookie.split("; ").find(row => row.startsWith("token="))?.split("=")[1];
 
       await fetch("http://localhost:5000/api/auth/logout", {
         method: "POST",
-        headers: { Authorization: `Bearer ${token}` },
+credentials: "include",
       });
 
-      document.cookie = "token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 GMT";
       router.push("/login");
     } catch (err) {
       console.error("Logout failed:", err);
@@ -88,10 +79,10 @@ const Profile = () => {
   };
 
   return (
-    <ProtectedRoute>
+    
           <div className="profile-container">
       <h2>Welcome, {user.username}!</h2>
-      <p>Email: {user.email}</p>
+      {/* <p>Email: {user.email}</p> */}
       
       {user.profileImage && <img src={user.profileImage} alt="Profile" className="profile-image" />}
 
@@ -119,7 +110,7 @@ const Profile = () => {
       <button onClick={handleLogout} className="logout-button">Logout</button>
       {error && <p className="error-message">{error}</p>}
     </div>
-    </ProtectedRoute>
+    
   );
 };
 

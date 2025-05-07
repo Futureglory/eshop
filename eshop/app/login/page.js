@@ -4,7 +4,6 @@ import axios from "axios";
 import { useRouter } from "next/navigation";
 import { Eye, EyeOff } from "lucide-react"; // 👈 Add this
 import Link from "next/link";
-const cookieParser = require('cookie-parser');
 
 const Login = () => {
   const router = useRouter();
@@ -14,9 +13,9 @@ const Login = () => {
   const [showPassword, setShowPassword] = useState(false);
 
 
-  useEffect(() => {
-    fetchProfile();
-  }, []);
+  // useEffect(() => {
+  //   fetchProfile();
+  // }, []);
 
   const handleChange = (e) => {
     setCredentials({ ...credentials, [e.target.name]: e.target.value });
@@ -27,57 +26,33 @@ const Login = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     try {
-      const response = await fetch("http://localhost:5000/api/users/login", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        credentials: "include",
-        body: JSON.stringify({
-          email: credentials.email,
-          password: credentials.password
-        }),
-      
-      });
+      await fetch("http://localhost:5000/api/users/login", { email: credentials.email, password: credentials.password }, { withCredentials: true });
+      console.log("Login successful");
+      // method: "POST",
+      // headers: { "Content-Type": "application/json" },
+      // credentials: "include",
+      // body: JSON.stringify({
+      //   email: credentials.email,
+      //   password: credentials.password
+      // }),
+      router.push("/");
 
-      const data = await response.json();
-      if (response.ok) {
-        document.cookie = `token=${data.token};path=/;`;
-        fetchProfile();
-      } else {
-        setError("Invalid email or password.");
-      }
-    } catch (err) {
-      setError("Login failed. Try again.");
-    }
-  };
-
-
-  const fetchProfile = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/users/profile", {
-        method: "GET",
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${token}`, // Replace with actual token
-        },
-        credentials: "include", // Send cookie with request
-      });
-
-      if (!res.ok) throw new Error("Failed to fetch profile");
-  
-      const data = await res.json();
-      console.log(data);
     } catch (error) {
-      console.error("Error fetching profile:", error.message);
+      setError("Login failed. Try again.");
+      console.error("Login error:", error);
     }
+
   };
-  
+
+
+
 
 
   return (
     <div className="login-container">
       <h1>Login</h1>
       {user?.isVerified ? (
-        <h2>Welcome, {username}!</h2>
+        <h2>Welcome, {user?.username}!</h2>
       ) : (
         <h2>Welcome!</h2>
       )}
@@ -105,21 +80,21 @@ const Login = () => {
           </span>
         </div>
         <div className="remember-container">
-        <label className="remember-label">
-    <input
-      type="checkbox"
-      name="remember"
-      checked={credentials.remember || false}
-      onChange={(e) =>
-        setCredentials({ ...credentials, remember: e.target.checked })
-      }
-    />
-    Remember Me
-  </label>
-        <p className="forgot-password">
-          <Link href="/forgot-password">Forgot password?</Link>
-        </p>
-</div>
+          <label className="remember-label">
+            <input
+              type="checkbox"
+              name="remember"
+              checked={credentials.remember || false}
+              onChange={(e) =>
+                setCredentials({ ...credentials, remember: e.target.checked })
+              }
+            />
+            Remember Me
+          </label>
+          <p className="forgot-password">
+            <Link href="/forgot-password">Forgot password?</Link>
+          </p>
+        </div>
         <button type="submit">Login</button>
 
       </form>

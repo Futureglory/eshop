@@ -6,8 +6,8 @@ import axios from 'axios';
 const OtpVerification = () => {
   const searchParams = useSearchParams();
   const email = searchParams.get('email'); // Get email from query params
-  const [otp, setOtp] = useState(["", "", "", "", "",""]); 
-    // Proper OTP state
+  const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+  // Proper OTP state
   const [message, setMessage] = useState("");
   const [resendMessage, setResendMessage] = useState('');
   const [loading, setLoading] = useState(false);
@@ -44,8 +44,8 @@ const OtpVerification = () => {
     }
   };
 
-   // Handle OTP resend
-   const handleResend = async () => {
+  // Handle OTP resend
+  const handleResend = async () => {
     setResendMessage('');
     try {
       const response = await fetch('http://localhost:5000/api/users/resend-otp', {
@@ -69,27 +69,31 @@ const OtpVerification = () => {
       {error && <p className="error-message">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="otpInput">
-        {otp.map((value, index) => (
-          <input
-            key={index}
-            id={`otp-${index}`}
-            type="text"
-            maxLength="1"
-            value={value}
-            onChange={(e) => handleChange(e.target.value, index)}
-            required
-          />
-        ))}
+          {otp.map((value, index) => (
+            <input
+              key={index}
+              id={`otp-${index}`}
+              type="text"
+              maxLength="1"
+              value={value}
+              onChange={(e) => handleChange(e.target.value, index)}
+              required
+            />
+          ))}
         </div>
         <button type="submit" disabled={loading}>
           {loading ? 'Verifying...' : 'Verify OTP'}
         </button>
       </form>
       <span className="otp-resend-text">Didn't receive the OTP?</span>
-      <a  href="" 
-      className="resend-btn"
-       onClick={handleResend} disabled={!email}>
-        Resend OTP
+      <a href="#"
+        className="resend-btn"
+        onClick={(e) => {
+          e.preventDefault();
+          handleResend();
+        }}
+        disabled={!email}
+      >        Resend OTP
       </a>
       {message && <p className={message.includes("successfully") ? "success" : "error"}>{message}</p>}
       {resendMessage && <p className={resendMessage.includes('✅') ? 'success' : 'error'}>{resendMessage}</p>}

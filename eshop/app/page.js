@@ -20,7 +20,8 @@ export default function Home() {
 
   return (
     <div className="landing-container">
-            <div className="card">
+      <h1> HOME PAGE</h1>
+            {/* <div className="card">
       <h1  className="title">Welcome to Eshop</h1>
       <p className="subtitle">Wear Confidence. Own Your Style.</p>
       </div>
@@ -46,7 +47,7 @@ export default function Home() {
         <Link href="/privacy-policy">Privacy Policy</Link>
         <Link href="/terms-of-service">Terms of Service</Link>
         <Link href="/contact">Contact Us</Link>
-      </footer>
+      </footer> */}
     </div>
     
   );
