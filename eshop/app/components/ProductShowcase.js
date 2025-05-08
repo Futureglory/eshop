@@ -7,11 +7,11 @@ const products = [
 
 const ProductShowcase = () => {
   return (
-    <div className={styles.showcase}>
+    <div className="showcase">
       <h2>Trending Styles</h2>
-      <div className={styles.products}>
+      <div className="products">
         {products.map(product => (
-          <div key={product.id} className={styles.product}>
+          <div key={product.id} className="product">
             <img src={product.image} alt={product.name} />
             <h3>{product.name}</h3>
             <p className='price'>{product.price}</p>

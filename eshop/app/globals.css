@@ -647,6 +647,126 @@ button {
   color: white;
 }
 
+.searchContainer {
+  position: relative;
+}
+
+.searchInput {
+  position: absolute;
+  top: -5px;
+  right: 0;
+  width: 180px;
+  padding: 5px;
+  border: 1px solid white;
+  border-radius: 5px;
+  background-color: white;
+  color: black;
+  font-size: 16px;
+  outline: none;
+  display: none;
+}
+
+.searchContainer:hover .searchInput {
+  display: block;
+}
+
+.searchResults {
+  list-style: none;
+  padding: 5px;
+  font-size: 14px;
+}
+
+.searchItem {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.searchImage {
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.searchInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.searchItem {
+  display: flex;
+  align-items: center;
+  padding: 8px;
+  cursor: pointer;
+}
+
+.searchItem a {
+  display: flex;
+  align-items: center;
+  text-decoration: none;
+  color: black;
+}
+
+.searchImage {
+  width: 40px;
+  height: 40px;
+  border-radius: 5px;
+  margin-right: 10px;
+}
+
+.searchInfo {
+  display: flex;
+  flex-direction: column;
+}
+
+.searchItem:hover {
+  background-color: #f1f1f1;
+}
+
+.accountContainer {
+  position: relative;
+}
+
+.accountDropdown {
+  position: absolute;
+  top: 40px;
+  right: 0;
+  width: 200px;
+  background: white;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.accountDropdown a {
+  text-decoration: none;
+  color: black;
+  padding: 8px;
+  transition: background 0.3s ease-in-out;
+}
+
+.accountDropdown a:hover {
+  background: #f1f1f1;
+}
+
+.logout {
+  padding: 8px;
+  border: none;
+  background: red;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.logout:hover {
+  background: darkred;
+}
+
 @media screen and (max-width: 768px) {
   .navLinks {
     position: absolute;
@@ -674,7 +794,47 @@ button {
 
 
 
+/*products*/
+.related-products {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
 
+.related-product {
+  padding: 10px;
+  background: #F9F9F9;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.related-product img {
+  width: 80px;
+  height: 80px;
+  border-radius: 5px;
+}
+
+
+.recommended-products {
+  display: flex;
+  gap: 20px;
+  margin-top: 20px;
+}
+
+.recommended-product {
+  padding: 10px;
+  background: #F9F9F9;
+  border-radius: 5px;
+  cursor: pointer;
+  text-align: center;
+}
+
+.recommended-product img {
+  width: 80px;
+  height: 80px;
+  border-radius: 5px;
+}
 
 
 

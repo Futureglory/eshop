@@ -17,13 +17,15 @@ const {
   updatePassword
 
 } = require("../controllers/authController");
-
+const { getUserDetails } = require("../controllers/userController");
 const { authMiddleware } = require("../middleware/authMiddleware");
 
 // Protected profile routes
 router.get("/profile", authMiddleware, getUserProfile);
 router.put("/profile", authMiddleware, updateProfile);
 router.put("/profile", authMiddleware, updatePassword);
+
+router.get("/account", authMiddleware, getUserDetails); // Requires authenticatio
 
 router.post("/signup", signup);
 router.post("/login", login);

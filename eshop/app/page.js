@@ -2,11 +2,17 @@
 import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./hooks/useAuth";
-import ThemeToggle from "./components/ThemeToggle";
+import { useTheme } from 'next-themes';
+import Hero from './components/Hero';
+import NavBar from './components/NavBar'
+import ThemeToggle from './components/ThemeToggle';
+import ProductShowcase from './components/ProductShowcase';
+import { CartProvider } from './context/CartContext'; // adjust the path if needed
 import Link from "next/link";
 
 export default function Home() {
   const { isAuthenticated } = useAuth();
+  const { theme, setTheme } = useTheme();
   const router = useRouter();
 
   useEffect(() => {
@@ -16,40 +22,44 @@ export default function Home() {
   }, [isAuthenticated]);
 
 
+  const toggleTheme = () => {
+    setTheme(theme === 'dark' ? 'light' : 'dark');
+  };
 
 
   return (
-    <div className="landing-container">
-      <h1> HOME PAGE</h1>
-            {/* <div className="card">
-      <h1  className="title">Welcome to Eshop</h1>
-      <p className="subtitle">Wear Confidence. Own Your Style.</p>
+    <CartProvider>
+      <div className="landing-container">
+        <div className="card">
+          <h1 className="title">Welcome to Eshop</h1>
+          <p className="subtitle">Wear Confidence. Own Your Style.</p>
+        </div>
+        <Link href="/signup">
+          <button className="signupButton">Sign Up Now</button>
+        </Link>
+        <Link href="/login">
+          <button className="loginButton">Log In</button>
+        </Link>
+        <button onClick={toggleTheme} className="theme-toggle"> Theme Mode</button>
+        <ThemeToggle />
+        <NavBar />
+        <Hero />
+        <ProductShowcase />
+        
+
+
+
+
+
+
+        <footer className="footer">
+          <p>&copy; 2023 Eshop. All rights reserved.</p>
+          <Link href="/privacy-policy">Privacy Policy</Link>
+          <Link href="/terms-of-service">Terms of Service</Link>
+          <Link href="/contact">Contact Us</Link>
+        </footer>
       </div>
-      <Link href="/signup">
-        <button className={styles.signupButton}>Sign Up Now</button>
-      </Link>
-      <Link href="/login">
-        <button className={styles.loginButton}>Log In</button>
-      </Link>
-      <button onClick={toggleTheme} className="theme-toggle">Toggle Theme</button>
-
-      <Hero />
-      <ProductShowcase />
-      <ThemeToggle />
-
-
-
-
-
-
-      <footer className={styles.footer}>
-        <p>&copy; 2023 Eshop. All rights reserved.</p>
-        <Link href="/privacy-policy">Privacy Policy</Link>
-        <Link href="/terms-of-service">Terms of Service</Link>
-        <Link href="/contact">Contact Us</Link>
-      </footer> */}
-    </div>
-    
+    </CartProvider>
   );
 
 }
