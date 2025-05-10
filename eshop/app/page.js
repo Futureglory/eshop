@@ -48,7 +48,7 @@ export default function Home() {
              <button className="loginButton">Log In</button>
            </Link>
            <button onClick={toggleTheme} className="themeToggle">
-             {theme === "light" ? <FiMoon size={20} /> : <FiSun size={20} />}
+             {theme === "light" ? <FiMoon size={18} /> : <FiSun size={18} />}
            </button>
          </div>
        </span>
