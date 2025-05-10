@@ -1,6 +1,8 @@
 // routes/userRoutes.js
 const express = require("express");
 const router = express.Router();
+const userController = require("../controllers/userController"); // check the path!
+
 const {
   signup,
   verifyOtp,
@@ -13,16 +15,18 @@ const {
   // Profile routes 
 
   getUserProfile,
-  updateProfile,
-  updatePassword
+
+  updatePassword,
 
 } = require("../controllers/authController");
-const { getUserDetails } = require("../controllers/userController");
+const { getUserDetails,   updateUserProfile, } = require("../controllers/userController");
 const { authMiddleware } = require("../middleware/authMiddleware");
+
+router.put("/update", authMiddleware, userController.updateUserProfile);
 
 // Protected profile routes
 router.get("/profile", authMiddleware, getUserProfile);
-router.put("/profile", authMiddleware, updateProfile);
+router.put("/profile", authMiddleware, updateUserProfile);
 router.put("/profile", authMiddleware, updatePassword);
 
 router.get("/account", authMiddleware, getUserDetails); // Requires authenticatio
