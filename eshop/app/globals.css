@@ -8,7 +8,7 @@ body {
 .otp-container {
   max-width: 400px;
   margin: 80px auto;
-  padding-right: 60px;
+  padding-right: 60px !important;
   padding: 30px 45px;
   background-color: #ffffff;
   border-radius: 12px;
@@ -45,13 +45,13 @@ body {
 }
 .password-input input {
   width: 100%;
-max-width: 370px;
-  padding: 12px 14px;
+max-width: 330px !important;
+  /* padding: 12px 14px; */
   margin: 10px 0;
   border: 1px solid #ccc;
   border-radius: 8px;
   transition: border-color 0.2s;
-  padding-right: 2.5rem;
+  /* padding-right: 2.5rem; */
 }
 .toggle-icon {
   position: absolute;
@@ -270,7 +270,7 @@ justify-content: center;
 
 
 .login-container {
-  max-width: 400px;
+  max-width: 430px !important;
   margin: 80px auto;
   padding: 30px 45px;
   background-color: #ffffff;
@@ -406,6 +406,32 @@ justify-content: center;
   align-items: center;
   margin-top: 5px;
 
+}
+
+@media (max-width: 768px) {
+  /* .login-container {
+    padding: 20px;
+    margin: 20px auto;
+  }
+  .login-container h1 {
+    font-size: 1.8rem;
+  }
+  .login-container h2 {
+    font-size: 1.5rem;
+  }
+  .login-container input {
+    font-size: 0.9rem;
+  }
+  .login-container button {
+    font-size: 0.9rem;
+    padding: 10px;
+  } */
+  .remember-container {
+    flex-direction: column;
+    align-items: flex-start;
+    gap:10px;
+    margin-top:2px;
+  }
 }
 /*reset-password*/
 
@@ -1044,7 +1070,7 @@ body, html {
   --eshop-text-light: #ffffff;
   --eshop-text-dark: #111827;
   --eshop-bg-light: #f9fafb;
-  --eshop-bg-dark: #1f2937;
+  --eshop-bg-dark: #000000;
 }
 
 /* Dark mode toggle */
@@ -1060,78 +1086,65 @@ html.light {
 /* ========== Banner Layout ========== */
 body {
   display: flex;
-  
-  background: whitesmoke;
-min-height: 100vh;
-}
-
-/* ========== Card Section ========== */
-/* .landing-container {
-  display: flex;
   flex-direction: column;
-  align-items: center;
-  width: 100%;
-  text-align: center;
-  gap: 1.5rem;
-  background-color: var(--eshop-bg-light);
-  margin-top: auto;
-} */
+  background: transparent;
+  min-height: 100vh;
+  margin: 0;
+  padding: 0;
+  font-family: sans-serif;
+}
 
 .banner {
   background-color: lightblue;
   color: var(--eshop-text-dark);
   justify-content: flex-start;
-  width:1360px ;
   display: flex;
-  gap: 20px;
-  height:35px;
+  gap: 1rem;
+  height: 35px;
+  width: 100%;
+  padding: 0 1rem;
+  box-sizing: border-box;
 }
 
  .title {
-  font-size: 20px;
+  font-size: 1.5rem;
   font-weight: bold;
-margin-top:10px;
   color: blue;
   text-align: center;
-  margin-left:10%;
+  margin: 0 auto;
+  margin-top: 5px;
 }
  .subtitle {
-  font-size: 16px;
+ font-size: 1rem;
   color: white;
-  margin-top: 10px;
-    text-align: center;
-margin-left: 10%;
+  text-align: center;
+  margin: 10px auto 0 auto;
 }
 
 /* ========== Buttons ========== */
 .buttons{
-  margin-left: 20%;
+  margin:
+   1rem 
+   auto;
   display: flex;
-  gap: 20px;
-  margin-top: 2px;
+  /* flex-wrap: wrap; */
+  margin-top: 0px;
+  gap: 1rem;
+  /* justify-content: center; */
 }
 .signupButton,
 .loginButton
  {
   background-color: #ffd700;
   border: none;
-  font-size: 16px !important;
+  font-size: 1rem !important;
+  margin-top: 3px;
   cursor: pointer;
-  width: auto;
-  height: 28px;
-  text-decoration:none;
-  margin-top:2px;
-}
-.themeToggle{
-  margin-top:2px;
-  background-color: transparent;
-   border: none;
-  font-size: 1rem;
-  cursor: pointer;
-  transition: all 0.3s ease;
-  width: auto;
-  height: 28px;
-margin-bottom:10px;
+  padding-bottom: 1pxm;
+  height: 26px;
+  border-radius: 4px;
+  text-decoration: none;
+  /* transition: background-color 0.3s ease; */
 }
 .signupButton:hover,
 .loginButton:hover
@@ -1139,9 +1152,19 @@ margin-bottom:10px;
   background-color: #f59e0b;
 
 }
+.themeToggle{
+margin-top: 2px;
+  background-color: transparent;
+  border: none;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  height: 26px;
+}
 .themeToggle:hover {
   background-color: white;
 }
+
 
 /* ========== Footer ========== */
 .footer {

@@ -1,9 +1,10 @@
 import { createContext, useState } from "react";
+import { useTheme } from 'next-themes';
 
 export const ThemeContext = createContext();
 
 export const ThemeProvider = ({ children }) => {
-  const [theme, setTheme] = useState("light"); // Always starts in light mode
+  const [theme, setTheme] = useTheme("light"); // Always starts in light mode
 
   const toggleTheme = () => {
     setTheme(theme === "light" ? "dark" : "light");
