@@ -1,8 +1,8 @@
 "use client";
 import { useState, useContext, useEffect } from "react";
 import Link from "next/link";
-import { FiUser, FiShoppingCart, FiSearch} from "react-icons/fi"; // Import icons
-import { CartContext,  ThemeContext } from "../context/CartContext";
+import { FiUser, FiShoppingCart, FiSearch, FiSettings } from "react-icons/fi"; // Import icons
+import { CartContext, ThemeContext } from "../context/CartContext";
 import * as Icons from "react-icons/fi"; // Import all icons dynamically
 
 const NavBar = () => {
@@ -22,12 +22,12 @@ const NavBar = () => {
       .then(data => setUser(data))
       .catch(() => setUser(null));
 
-      fetch("http://localhost:5000/api/account/options")
+    fetch("http://localhost:5000/api/account/options")
       .then(response => response.json())
       .then(options => setAccountOptions(options));
   }, []);
 
- 
+
 
 
   const handleSearch = async (e) => {
@@ -45,32 +45,30 @@ const NavBar = () => {
   };
 
   return (
-  
+
     <nav className="nav">
-      <div className="logo">Eshop</div>
+      {/* <div className="logo">Eshop</div> */}
 
-      <div className={`$"navLinks" ${menuOpen ? styles.open : ""}`}>
-        <Link href="/">Home</Link>
-        <Link href="/products">Products</Link>
-        <Link href="/about">About</Link>
-        <Link href="/contact">Contact</Link>
+      <div className={`$"navLinks" ${menuOpen ? open : ""}`}>
+        <div className="menuToggle" onClick={() => setMenuOpen(!menuOpen)}>
+          <ul>
+            <Link href="/">Home</Link>
+            <Link href="/women">Women</Link>
+            <Link href="/men">Men</Link>
+            <Link href="/contact">Contact Us</Link>
+            <Link href="/about">About Us</Link>
+          </ul>
+        </div>
       </div>
-
-        {/* Theme Toggle Button */}
-        {/* <button onClick={toggleTheme} className={styles.themeToggle}>
-          {theme === "light" ? <FiMoon /> : <FiSun />}
-        </button> */}
-
-
       <div className="navIcons">
         {/* Account Dropdown */}
         <div className="accountContainer">
           <FiUser className="icon" onClick={() => setAccountOpen(!accountOpen)} />
           {accountOpen && (
-            <div className={styles.accountDropdown}>
+            <div className="accountDropdown">
               {user && (
-                <div className={styles.userInfo}>
-                  <img src={user.avatar} alt="Profile Avatar" className={styles.avatar} />
+                <div className="userInfo">
+                  <img src={user.avatar} alt="Profile Avatar" className="avatar" />
                   <p>{user.name}</p>
                   <p>{user.email}</p>
                 </div>
@@ -82,11 +80,11 @@ const NavBar = () => {
                   <Link key={option.id} href={option.route}>
                     {IconComponent && <IconComponent />} {option.name}
                   </Link>
-                  
+
                 );
               })}
               {user && <Link href="/settings"><FiSettings /> Settings</Link>}
-              {user && <button className={styles.logout}><FiUser /> Logout</button>}
+              {user && <button className="logout"><FiUser /> Logout</button>}
               {!user && <Link href="/login"><FiUser /> Login</Link>}
             </div>
           )}
@@ -127,10 +125,6 @@ const NavBar = () => {
           {cartItems.length > 0 && <span className="cartBadge">{cartItems.length}</span>}
         </div>
       </div>
-
-      <button className="menuIcon" onClick={() => setMenuOpen(!menuOpen)}>
-        ☰
-      </button>
     </nav>
   );
 };

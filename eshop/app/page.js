@@ -53,8 +53,8 @@ export default function Home() {
          </div>
        </span>
       
-       {/* <NavBar />
-        <Hero />
+       <NavBar />
+        {/* <Hero />
         <ProductShowcase /> */}
 
 
