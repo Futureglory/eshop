@@ -620,68 +620,85 @@ button {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  /* padding: 0 1rem; */
-  background-color: #4169E1;
-  color: white;
-  position: sticky;
-  top: 0;
-  width: 100%;
-  max-width: 100%;
-  z-index: 1000;
+  background-color: #3f6fd3;
   height: 50px;
 }
-
-.logo {
+.hamburger {
+  display: none;
   font-size: 24px;
-  font-weight: bold;
+  background: none;
+  border: none;
+  color: white;
+  cursor: pointer;
 }
-
 .navLinks {
   display: flex;
   gap: 20px;
-  text-decoration: none;
-  gap: 10px;
+  list-style: none;
 }
-.menuToggle{
-  gap:30px !important;
+.navLinks li {
+  position: relative;
+  color: white;
+}
+.navLinks li a{
     text-decoration: none;
-  color: white;
+  color: black;
+  cursor: pointer;
 }
-.menuToggle ul a{
+.navLinks li span,
+.navLinks .navLink a{
   text-decoration: none;
   color: white;
-  gap: 10% !important;
-  margin-right:30px;
-  transition: color 0.3s ease-in-out;
+  cursor: pointer;
+}
+.navLinks a:hover,
+.navLinks li span:hover {
+  color: #FFD700;
+}
+.dropdown-menu {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  color:black;
+  background: whitesmoke;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  z-index: 1000;
 }
 
-.navLinks a:hover {
-  color: #FFD700;
+.dropdown:hover .dropdown-menu {
+  display: flex;
+}
+
+.dropdown-menu a {
+  text-decoration: none;
+  color: black;
+  padding: 8px;
+    white-space: nowrap;
+  transition: background 0.3s ease-in-out;
+}
+
+.dropdown-menu a:hover {
+  background: #f1f1f1;
 }
 
 .navIcons {
   display: flex;
   gap: 20px;
-  align-items: center;
-  margin-right:70px;
+  /* align-items: center; */
+  margin-right:7%;
+MARGIN-LEFT:7%;
 }
 
 .icon {
   font-size: 22px;
   cursor: pointer;
+  color:white;
 }
 
 .icon:hover {
   color: #FFD700;
-}
-/* Mobile Menu */
-.menuIcon {
-  display: none;
-  font-size: 24px;
-  background: none;
-  border: none;
-  cursor: pointer;
-  color: white;
 }
 
 .searchContainer {
@@ -825,25 +842,35 @@ button {
   background: darkred;
 }
 
-@media screen and (max-width: 768px) {
+
+
+/* Small screen styles */
+@media (max-width: 768px) {
+  .hamburger {
+    display: block;
+  }
+
   .navLinks {
+    display: none;
+    flex-direction: column;
+    background-color: #3f6fd3;
     position: absolute;
     top: 60px;
-    right: 0;
-    background: #4169E1;
+    left: 0;
     width: 100%;
-    flex-direction: column;
-    display: none;
+    padding: 10px;
   }
 
   .navLinks.open {
     display: flex;
   }
-
-  .menuIcon {
-    display: block;
+    .dropdown-menu {
+    position: static;
+    width: 100%;
   }
+
 }
+
 
 
 
@@ -896,163 +923,115 @@ button {
 
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-/*Home*/
-
-
-/* .container {
-  text-align: center;
-  padding: 50px;
-  background-color: #F9F9F9;
-}
-
-.tagline {
-  font-size: 20px;
+/* Contact */
+h1 {
+  font-size: 42px;
   color: #FFD700;
 }
 
-button {
-  padding: 10px 20px;
-  margin: 10px;
-  border: none;
-  border-radius: 5px;
-  font-size: 18px;
-  cursor: pointer;
+
+
+/* Contact Page Styles */
+.contact-container {
+  max-width: 1000px;
+  margin: 50px auto;
+  padding: 50px;
+  padding-right: 100px;
+  background-color: #fdfdfd;
+  border-radius: 8px;
+  box-shadow: 0 0 12px rgba(0, 0, 0, 0.08);
 }
 
-.signupButton {
-  background-color: #FFD700;
-  color: black;
-}
-
-.loginButton {
-  background-color: #4169E1;
-  color: white;
-}
-
-body {
-  margin: 0;
-  padding: 0;
-  font-family: sans-serif;
-  background: linear-gradient(to right, #dfe9f3, #ffffff);
-  transition: background 0.3s;
-}
-
-body.dark {
-  background: #111;
-  color: white;
-}
-
-.landing-container {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  min-height: 100vh;
-}
-
-.card {
-  background: white;
-  padding: 2rem;
-  border-radius: 1rem;
+.contact-title {
   text-align: center;
-  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-}
-
-body.dark .card {
-  background: #222;
-}
-
-.title {
   font-size: 2rem;
-  color: #0070f3;
+  margin-bottom: 20px;
+  color: blue;
 }
 
-.subtitle {
-  margin-bottom: 1.5rem;
+.contact-form .form-group {
+  margin-bottom: 20px;
 }
 
-
-.link {
-  color: #0070f3;
-  text-decoration: underline;
+.input,
+.textarea {
+  width: 100%;
+  padding: 10px 20px;
+  font-size: 1rem;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  transition: border-color 0.2s;
 }
 
-.theme-toggle {
-  position: absolute;
-  top: 1rem;
-  right: 1rem;
-  background: #eee;
-  border: none;
-  padding: 0.5rem 1rem;
-  cursor: pointer;
+.input:focus,
+.textarea:focus {
+  border-color: #0070f3;
+  outline: none;
 }
-body.dark .theme-toggle {
-  background: #444;
+
+.error {
+  border-color: #e63946 !important;
+}
+
+.error-text {
+  color: #e63946;
+  font-size: 0.875rem;
+  margin-top: 4px;
+}
+
+.submit-btn {
+  display: block;
+  width: 100%;
+  background-color: #ffc400;
   color: white;
-} */
+  border: none;
+  padding: 12px 16px;
+  border-radius: 6px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.2s;
+}
+
+.submit-btn:hover {
+  background-color: #ffc400;
+}
+
+.success-message {
+  text-align: center;
+  margin-top: 20px;
+  color: #2a9d8f;
+  font-weight: 600;
+  font-size: 1rem;
+}
+
+.input-wrapper {
+  position: relative;
+}
+
+.input-icon {
+  position: absolute;
+  top: 50%;
+  left: 12px;
+  transform: translateY(-50%);
+  color: #888;
+  pointer-events: none;
+}
+
+.input,
+.textarea {
+  padding-left: 36px;
+}
+
+.spinner {
+  animation: spin 1s linear infinite;
+  font-size: 1.2rem;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
 
 
 
@@ -1063,7 +1042,57 @@ body.dark .theme-toggle {
 
 
 
-/* global.css */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* Home */
 
 /* ========== Global Reset ========== */
 body, html {

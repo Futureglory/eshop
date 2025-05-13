@@ -5,7 +5,6 @@ import { useAuth } from "./hooks/useAuth";
 import { useTheme } from 'next-themes';
 import Hero from './components/Hero';
 import { FiSun, FiMoon } from "react-icons/fi";
-
 import NavBar from './components/NavBar'
 import ThemeToggle from './components/ThemeToggle';
 import ProductShowcase from './components/ProductShowcase';

@@ -1,12 +1,11 @@
 "use client";
-import { useState, useContext, useEffect } from "react";
+import { useState, useContext, useEffect, useRef } from "react";
 import Link from "next/link";
 import { FiUser, FiShoppingCart, FiSearch, FiSettings } from "react-icons/fi"; // Import icons
 import { CartContext, ThemeContext } from "../context/CartContext";
 import * as Icons from "react-icons/fi"; // Import all icons dynamically
 
 const NavBar = () => {
-  const [menuOpen, setMenuOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [accountOpen, setAccountOpen] = useState(false);
   const [user, setUser] = useState(null);
@@ -14,7 +13,47 @@ const NavBar = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [accountOptions, setAccountOptions] = useState([]);
   const { cartItems } = useContext(CartContext);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isWomenOpen, setIsWomenOpen] = useState(false);
+  const [isMenOpen, setIsMenOpen] = useState(false);
+
   // const { theme, toggleTheme } = useContext(ThemeContext);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      // Safe to access browser-specific objects
+    }
+  }, []);
+
+  const womenRef = useRef(null);
+  const menRef = useRef(null);
+  const accountRef = useRef(null);
+  const searchRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (womenRef.current && !womenRef.current.contains(event.target)) {
+        setIsWomenOpen(false);
+      }
+      if (menRef.current && !menRef.current.contains(event.target)) {
+        setIsMenOpen(false);
+      }
+      if (accountRef.current && !accountRef.current.contains(event.target)) {
+        setAccountOpen(false);
+      }
+      if (searchRef.current && !searchRef.current.contains(event.target)) {
+        setSearchOpen(false);
+      }
+
+
+    };
+
+    document.addEventListener("mousedown", handleClickOutside);
+
+    return () => {
+      document.removeEventListener("mousedown", handleClickOutside);
+    };
+  }, []);
 
   useEffect(() => {
     fetch("http://localhost:5000/api/users/account", { credentials: "include" })
@@ -49,21 +88,55 @@ const NavBar = () => {
     <nav className="nav">
       {/* <div className="logo">Eshop</div> */}
 
-      <div className={`$"navLinks" ${menuOpen ? open : ""}`}>
-        <div className="menuToggle" onClick={() => setMenuOpen(!menuOpen)}>
-          <ul>
-            <Link href="/">Home</Link>
-            <Link href="/women">Women</Link>
-            <Link href="/men">Men</Link>
-            <Link href="/contact">Contact Us</Link>
-            <Link href="/about">About Us</Link>
-          </ul>
-        </div>
-      </div>
+      {/* Hamburger toggle */}
+      <button className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
+        ☰
+      </button>
+
+      {/* Responsive Nav Links */}
+      <ul className={`navLinks ${isMenuOpen ? "open" : ""}`} ref={womenRef}>
+        <li className="navLink"><Link href="/">Home</Link></li>
+
+        {/* Women */}
+        <li className={`dropdown ${isWomenOpen ? "open" : ""}`}>
+          <span onClick={() => setIsWomenOpen(prev => !prev)}>Women</span>
+          {isWomenOpen && (
+            <div className="dropdown-menu">
+              <Link href="/women/gowns">Gowns</Link>
+              <Link href="/women/handbags">Handbags</Link>
+              <Link href="/women/skirts">Skirts</Link>
+              <Link href="/women/shoes">Shoes</Link>
+              <Link href="/women/tops">Tops</Link>
+
+            </div>
+          )}
+        </li>
+
+        {/* Men */}
+        <li className={`dropdown ${isMenOpen ? "open" : ""}`} ref={menRef}>
+          <span onClick={() => setIsMenOpen(prev => !prev)}>Men</span>
+          {isMenOpen && (
+            <div className="dropdown-menu">
+              <Link href="/men/suits">Suits</Link>
+              <Link href="/men/shirts">Shirts</Link>
+              <Link href="/men/trousers">Trousers</Link>
+              <Link href="/men/shorts">Shorts</Link>
+              <Link href="/men/shoes">Shoes</Link>
+              <Link href="/men/tops">Tops</Link>
+            </div>
+          )}
+        </li>
+
+        <li className="navLink"><Link href="/contact">Contact Us</Link></li>
+        <li className="navLink"><Link href="/about">About Us</Link></li>
+      </ul>
+
+
+
       <div className="navIcons">
         {/* Account Dropdown */}
         <div className="accountContainer">
-          <FiUser className="icon" onClick={() => setAccountOpen(!accountOpen)} />
+          <FiUser className="icon" onClick={() => setAccountOpen(!accountOpen)} ref={accountRef} />
           {accountOpen && (
             <div className="accountDropdown">
               {user && (
@@ -90,9 +163,8 @@ const NavBar = () => {
           )}
         </div>
 
-
         <div className="searchContainer">
-          <FiSearch className="icon" onClick={() => setSearchOpen(!searchOpen)} />
+          <FiSearch className="icon" onClick={() => setSearchOpen(!searchOpen)} ref={searchRef} />
           {searchOpen && (
             <div className="searchBox">
               <input
