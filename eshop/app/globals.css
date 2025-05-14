@@ -645,6 +645,26 @@ button {
   color: black;
   cursor: pointer;
 }
+.dropdown span {
+  display: flex;
+  align-items: center;
+  gap: 0.3rem;
+  cursor: pointer;
+}
+
+.dropdown-icon {
+  font-size: 0.9rem;
+  transition: transform 0.3s ease;
+}
+
+.dropdown.open .dropdown-icon {
+  transform: rotate(180deg); /* optional: rotate when open */
+}
+
+.dropdown-arrow {
+  font-size: 0.75rem;
+}
+
 .navLinks li span,
 .navLinks .navLink a{
   text-decoration: none;
@@ -825,7 +845,19 @@ MARGIN-LEFT:7%;
   height: 50px;
   border-radius: 50%;
 }
-
+.accountDropdown button,
+.accountDropdown a {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  text-decoration: none;
+  color: black;
+  padding: 10px;
+  transition: background 0.3s ease-in-out;
+  border: none;
+  background: none;
+  cursor: pointer;
+}
 .logout {
   display: flex;
   align-items: center;
@@ -874,6 +906,31 @@ MARGIN-LEFT:7%;
 
 
 
+/* profile*/
+.profile-page {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.avatar {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+}
+
+.logout-btn {
+  padding: 8px;
+  border: none;
+  background: red;
+  color: white;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.logout-btn:hover {
+  background: darkred;
+}
 
 
 

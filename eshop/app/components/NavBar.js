@@ -1,7 +1,7 @@
 "use client";
 import { useState, useContext, useEffect, useRef } from "react";
 import Link from "next/link";
-import { FiUser, FiShoppingCart, FiSearch, FiSettings } from "react-icons/fi"; // Import icons
+import { FiUser, FiShoppingCart, FiSearch, FiSettings, FiChevronDown, FiHeart, FiFileText, FiLock } from "react-icons/fi"; // Import icons
 import { CartContext, ThemeContext } from "../context/CartContext";
 import * as Icons from "react-icons/fi"; // Import all icons dynamically
 
@@ -13,10 +13,10 @@ const NavBar = () => {
   const [searchResults, setSearchResults] = useState([]);
   const [accountOptions, setAccountOptions] = useState([]);
   const { cartItems } = useContext(CartContext);
+  const [showProfile, setShowProfile] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [isWomenOpen, setIsWomenOpen] = useState(false);
   const [isMenOpen, setIsMenOpen] = useState(false);
-
   // const { theme, toggleTheme } = useContext(ThemeContext);
 
   useEffect(() => {
@@ -83,12 +83,20 @@ const NavBar = () => {
     setSearchResults(data);
   };
 
+  const handleLogout = () => {
+    fetch("http://localhost:5000/api/users/logout", {
+      method: "POST",
+      credentials: "include",
+    }).then(() => {
+      setUser(null); // Clear user session
+      setAccountOpen(false); // Close dropdown
+    });
+  };
+
   return (
 
     <nav className="nav">
-      {/* <div className="logo">Eshop</div> */}
 
-      {/* Hamburger toggle */}
       <button className="hamburger" onClick={() => setIsMenuOpen(!isMenuOpen)}>
         ☰
       </button>
@@ -99,13 +107,14 @@ const NavBar = () => {
 
         {/* Women */}
         <li className={`dropdown ${isWomenOpen ? "open" : ""}`}>
-          <span onClick={() => setIsWomenOpen(prev => !prev)}>Women</span>
+          <span onClick={() => setIsWomenOpen(!isWomenOpen)}>Women  <FiChevronDown className="dropdown-icon" /></span>
           {isWomenOpen && (
             <div className="dropdown-menu">
               <Link href="/women/gowns">Gowns</Link>
               <Link href="/women/handbags">Handbags</Link>
-              <Link href="/women/skirts">Skirts</Link>
               <Link href="/women/shoes">Shoes</Link>
+              <Link href="/women/skirts">Skirts</Link>
+              <Link href="/women/suits">Suits</Link>
               <Link href="/women/tops">Tops</Link>
 
             </div>
@@ -114,7 +123,7 @@ const NavBar = () => {
 
         {/* Men */}
         <li className={`dropdown ${isMenOpen ? "open" : ""}`} ref={menRef}>
-          <span onClick={() => setIsMenOpen(prev => !prev)}>Men</span>
+          <span onClick={() => setIsMenOpen(!isMenOpen)}>Men <FiChevronDown className="dropdown-icon" /></span>
           {isMenOpen && (
             <div className="dropdown-menu">
               <Link href="/men/suits">Suits</Link>
@@ -131,37 +140,34 @@ const NavBar = () => {
         <li className="navLink"><Link href="/about">About Us</Link></li>
       </ul>
 
-
-
       <div className="navIcons">
         {/* Account Dropdown */}
         <div className="accountContainer">
-          <FiUser className="icon" onClick={() => setAccountOpen(!accountOpen)} ref={accountRef} />
+          <FiUser className="icon" onClick={() => setAccountOpen(!accountOpen)} />
+
           {accountOpen && (
             <div className="accountDropdown">
-              {user && (
+              <Link href="/profile" onClick={() => setShowProfile(!showProfile)}>
+                <FiUser /> Profile
+              </Link>
+              <Link href="/wishlist"><FiHeart /> Wishlist</Link>
+              <Link href="/terms"><FiFileText /> Terms & Conditions</Link>
+              <Link href="/privacy"><FiLock /> Privacy Policy</Link>
+
+              {/* {showProfile && user && (
                 <div className="userInfo">
                   <img src={user.avatar} alt="Profile Avatar" className="avatar" />
                   <p>{user.name}</p>
                   <p>{user.email}</p>
+                  <Link href="/settings"><FiSettings /> Settings</Link>
+                  {user && <button className="logout" onClick={handleLogout}><FiUser /> Logout</button>}
                 </div>
-              )}
-
-              {accountOptions.map(option => {
-                const IconComponent = Icons[option.icon];
-                return (
-                  <Link key={option.id} href={option.route}>
-                    {IconComponent && <IconComponent />} {option.name}
-                  </Link>
-
-                );
-              })}
-              {user && <Link href="/settings"><FiSettings /> Settings</Link>}
-              {user && <button className="logout"><FiUser /> Logout</button>}
-              {!user && <Link href="/login"><FiUser /> Login</Link>}
+              )} */}
             </div>
           )}
         </div>
+
+
 
         <div className="searchContainer">
           <FiSearch className="icon" onClick={() => setSearchOpen(!searchOpen)} ref={searchRef} />
@@ -197,6 +203,7 @@ const NavBar = () => {
           {cartItems.length > 0 && <span className="cartBadge">{cartItems.length}</span>}
         </div>
       </div>
+
     </nav>
   );
 };

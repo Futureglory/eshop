@@ -33,3 +33,7 @@ exports.updateUserProfile = async (req, res) => {
   }
 };
 
+exports.logout = (req, res) => {
+  res.clearCookie("token"); // Remove authentication token
+  res.json({ message: "Logged out successfully!" });
+};
