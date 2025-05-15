@@ -1,7 +1,7 @@
 "use client";
 import { useState, useContext, useEffect, useRef } from "react";
 import Link from "next/link";
-import { FiUser, FiShoppingCart, FiSearch, FiSettings, FiChevronDown, FiHeart, FiFileText, FiLock } from "react-icons/fi"; // Import icons
+import { FiUser, FiShoppingCart, FiSearch, FiChevronDown, FiHeart, FiFileText, FiLock } from "react-icons/fi"; // Import icons
 import { CartContext, ThemeContext } from "../context/CartContext";
 import * as Icons from "react-icons/fi"; // Import all icons dynamically
 
@@ -153,16 +153,12 @@ const NavBar = () => {
               <Link href="/wishlist"><FiHeart /> Wishlist</Link>
               <Link href="/terms"><FiFileText /> Terms & Conditions</Link>
               <Link href="/privacy"><FiLock /> Privacy Policy</Link>
+              {/* {user && <button className="logout" onClick={handleLogout}><FiUser /> Logout</button>} */}
 
-              {/* {showProfile && user && (
-                <div className="userInfo">
-                  <img src={user.avatar} alt="Profile Avatar" className="avatar" />
-                  <p>{user.name}</p>
-                  <p>{user.email}</p>
-                  <Link href="/settings"><FiSettings /> Settings</Link>
-                  {user && <button className="logout" onClick={handleLogout}><FiUser /> Logout</button>}
-                </div>
-              )} */}
+       
+              {/* <Link href="/setting"><FiSettings />Settings</Link> */}
+
+
             </div>
           )}
         </div>

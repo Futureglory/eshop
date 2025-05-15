@@ -21,6 +21,10 @@ const {
 } = require("../controllers/authController");
 const { getUserDetails,   updateUserProfile, } = require("../controllers/userController");
 const { authMiddleware } = require("../middleware/authMiddleware");
+const multer = require("multer");
+
+
+const upload = multer({ dest: "uploads/" });
 
 router.put("/update", authMiddleware, userController.updateUserProfile);
 
@@ -28,6 +32,8 @@ router.put("/update", authMiddleware, userController.updateUserProfile);
 router.get("/profile", authMiddleware, getUserProfile);
 router.put("/profile", authMiddleware, updateUserProfile);
 router.put("/profile", authMiddleware, updatePassword);
+router.put("/profile/update", authMiddleware, upload.single("avatar"), updateUserProfile);
+
 
 router.get("/account", authMiddleware, getUserDetails); // Requires authenticatio
 

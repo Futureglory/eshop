@@ -2,10 +2,11 @@
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 import ProtectedRoute from "../components/protectedRoute";
+import { FiSettings } from "react-icons/fi";
+import Link from 'next/link';
 
 const Profile = () => {
-  const [user, setUser] = useState({ username: "", email: "", profileImage: "" });
-  const [profileImage, setProfileImage] = useState(null);
+  const [user, setUser] = useState({ username: "", email: "", avatar: "" });
   const [error, setError] = useState("");
   const router = useRouter();
 
@@ -20,20 +21,20 @@ const Profile = () => {
   if (!user) return <p>Please log in to view your profile.</p>;
 
 
-  const fetchProfile = async () => {
-    try {
-      const response = await fetch("http://localhost:5000/api/users/profile", {
-      method: "POST",
-        credentials: "include",
-      });
+  // const fetchProfile = async () => {
+  //   try {
+  //     const response = await fetch("http://localhost:5000/api/users/profile", {
+  //     method: "POST",
+  //       credentials: "include",
+  //     });
 
-      const data = await response.json();
-      if (response.ok) setUser(data.user);
-      else setError("Failed to load profile.");
-    } catch (err) {
-      setError("Something went wrong.");
-    }
-  };
+  //     const data = await response.json();
+  //     if (response.ok) setUser(data.user);
+  //     else setError("Failed to load profile.");
+  //   } catch (err) {
+  //     setError("Something went wrong.");
+  //   }
+  // };
 
 const handleLogout = async () => {
   try {
@@ -54,10 +55,13 @@ const handleLogout = async () => {
  
   return (
     <div className="profile-page">
-      <h1>Welcome, {user.name}!</h1>
-      <img src={user.avatar} alt="Profile Avatar" className="avatar" />
+      <h1>Welcome, {user.username}!</h1>
+ {/* Display Default Avatar if No Image Exists */}
+      <img src={user.avatar || "/default-avatar.png"} alt="Profile Avatar" className="avatar" />
+          <p>Username: {user.username}</p>
       <p>Email: {user.email}</p>
       <p>Joined: {user.createdAt}</p>
+                    <Link href="/edit"><FiSettings /> Edit Profile</Link>
       <button className="logout-btn">Logout</button>
     </div>
   );
