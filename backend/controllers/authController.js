@@ -46,17 +46,10 @@ exports.signup = async (req, res) => {
       "OTP Verification",
       `<p>Your OTP is: <b>${otp}</b>. It will expire in 10 minutes.</p>`
     );
-return res.status(201).json({ message: "Signup successful. Check your email for the OTP." });
-  } catch (error) {
-    console.error("signup error", error);
+    return res.status(201).json({ message: "Signup successful. Check your email for the OTP." });
+  } catch (err) {
+    console.error("signup error", err);
     res.status(500).json({ message: "Server error" });
-  }
-  if (error.name === 'SequelizeUniqueConstraintError') {
-    return res.status(400).json({ message: 'Email already in use.' });
-  }
-  const existingUser = await User.findOne({ where: { email } });
-  if (existingUser) {
-    return res.status(400).json({ message: 'Email already registered' });
   }
 
 };
@@ -81,9 +74,12 @@ exports.verifyOtp = async (req, res) => {
 
     res.status(200).json({ message: "OTP verified. Account is now active." });
   } catch (err) {
+  if (process.env.NODE_ENV !== "production") {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
   }
+  res.status(500).json({ message: "Server error" });
+}
+
 };
 
 exports.resendOtp = async (req, res) => {
@@ -131,20 +127,17 @@ exports.login = async (req, res) => {
 
     if (!user.isVerified) return res.status(401).json({ message: "Please verify your email first" });
 
-    // const token = generateToken(user.id);
+ const token = generateToken(user.id);
+setTokenCookie(res, token); // Uses your helper function
 
-    // res.cookie("token", token, {
-    //   httpOnly: true,
-    //   secure: process.env.NODE_ENV === "production", // true in prod, false in dev
-    //   sameSite: "strict",
-    //   maxAge: 24 * 60 * 60 * 1000, // 1 day
-    // });
+    return res.status(200).json({
+      message: "Login successful",
+      user: { id: user.id, email: user.email } 
+    });
 
-    return res.status(200).json({ message: "Login successful", user: { id: user.id, email: user.email } });
-  } catch (error) {
-    console.error(error);
-    res.status(500).json({ message: "Server error" });
-  }
+} catch (err) {
+  console.error("Login error:", err);
+  res.status(500).json({ message: "Server error" });
 };
 
 exports.logout = (req, res) => {
@@ -197,31 +190,18 @@ exports.resetPassword = async (req, res) => {
     await user.save();
 
     res.status(200).json({ message: "Password has been reset" });
-  } catch (err) {
+} catch (err) {
+  if (process.env.NODE_ENV !== "production") {
     console.error(err);
-    res.status(500).json({ message: "Server error" });
   }
+  res.status(500).json({ message: "Server error" });
+}
 
-  const sendPasswordResetEmail = async (userEmail, resetLink) => {
-    const message = `Hello,
-
-You have requested a password reset. Please click the link below to reset your password:
-${resetLink}
-
-If you did not request this, please ignore this email.`;
-
-    await sendEmail({
-      to: userEmail,
-      subject: "Password Reset Request",
-      text: message,
-      // html: `<p>${message}</p>`, // Optionally, use HTML content
-    });
-  };
 };
 
 exports.getUserProfile = async (req, res) => {
   try {
-    const token = req.cookies.token;
+    const token = req.cookies.jwt;
     if (!token) return res.status(401).json({ message: "No token provided" });
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET);
@@ -239,7 +219,11 @@ exports.getUserProfile = async (req, res) => {
 };
 
 exports.updateProfile = async (req, res) => {
+
   try {
+    if (!req.user || !req.user.id) {
+     return res.status(401).json({ message: "Unauthorized" });
+   }
     const { username, email } = req.body;
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -256,6 +240,9 @@ exports.updateProfile = async (req, res) => {
 };
 exports.updatePassword = async (req, res) => {
   try {
+    if (!req.user || !req.user.id) {
+      return res.status(401).json({ message: "Unauthorized" });
+   }
     const { currentPassword, newPassword } = req.body;
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -304,7 +291,7 @@ exports.requestPasswordReset = async (req, res) => {
       <p>Please click the link below to reset your password:</p>
       <a href="${resetUrl}">${resetUrl}</a>
       <p>This link will expire in 15 minutes.</p>
-    `;
+    `};
 
     await sendEmail({
       to: email,
@@ -318,3 +305,20 @@ exports.requestPasswordReset = async (req, res) => {
     res.status(500).json({ message: 'Something went wrong. Try again later.' });
   }
 };
+
+exports.sendPasswordResetEmail = async (userEmail, resetLink) => {
+    const message = `Hello,
+
+   You have requested a password reset. Please click the link below to reset your password:
+   ${resetLink}
+
+   If you did not request this, please ignore this email.`;
+
+    await sendEmail({
+      to: userEmail,
+      subject: "Password Reset Request",
+      text: message,
+      // html: `<p>${message}</p>`, // Optionally, use HTML content
+    });
+  }
+}

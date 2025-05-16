@@ -4,8 +4,7 @@ const blacklist = new Set(); // Used in logout to invalidate tokens
 
 // Middleware for checking JWT and token blacklist
 const authMiddleware = (req, res, next) => {
-  const authHeader = req.headers.authorization;
-  const token = authHeader && authHeader.split(" ")[1]; // Extract token from "Bearer <token>"
+let token = req.headers.authorization?.split(" ")[1] || req.cookies.jwt;
 
   if (!token) {
     return res.status(403).json({ message: "No token provided." });
@@ -26,7 +25,7 @@ const authMiddleware = (req, res, next) => {
 
 // Middleware for protecting routes (with user lookup)
 const protect = async (req, res, next) => {
-  const token = req.cookies.token;
+  const token = req.cookies.jwt;
 
   if (!token) {
     return res.status(401).json({ message: "Not authorized, no token." });

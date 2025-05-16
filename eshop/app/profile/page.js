@@ -11,30 +11,39 @@ const Profile = () => {
   const router = useRouter();
 
   // Fetch user profile
-  useEffect(() => {
-    fetch("http://localhost:5000/api/users/profile", { credentials: "include" })
-      .then(response => response.json())
-      .then(data => setUser(data))
-      .catch(() => setUser(null));
-  }, []);
+useEffect(() => {
+  const fetchProfile = async () => {
+    try {
+      const token = document.cookie.split("; ").find(row => row.startsWith("jwt="))?.split("=")[1];
 
-  if (!user) return <p>Please log in to view your profile.</p>;
+      if (!token) {
+        console.error("No authentication token found! Please log in.");
+        return;
+      }
 
+      const response = await fetch("http://localhost:5000/api/users/profile", {
+        method: "GET",
+        credentials: "include",
+        headers: {
+          "Content-Type": "application/json",
+          Authorization: `Bearer ${token}`,
+        },
+      });
 
-  // const fetchProfile = async () => {
-  //   try {
-  //     const response = await fetch("http://localhost:5000/api/users/profile", {
-  //     method: "POST",
-  //       credentials: "include",
-  //     });
+      const data = await response.json();
 
-  //     const data = await response.json();
-  //     if (response.ok) setUser(data.user);
-  //     else setError("Failed to load profile.");
-  //   } catch (err) {
-  //     setError("Something went wrong.");
-  //   }
-  // };
+      if (response.ok) {
+        setUser(data.user);
+      } else {
+        console.error("Error fetching profile:", data.message);
+      }
+    } catch (err) {
+      console.error("Network error:", err);
+    }
+  };
+
+  fetchProfile();
+}, []);
 
 const handleLogout = async () => {
   try {
@@ -55,12 +64,15 @@ const handleLogout = async () => {
  
   return (
     <div className="profile-page">
-      <h1>Welcome, {user.username}!</h1>
- {/* Display Default Avatar if No Image Exists */}
-      <img src={user.avatar || "/default-avatar.png"} alt="Profile Avatar" className="avatar" />
-          <p>Username: {user.username}</p>
-      <p>Email: {user.email}</p>
-      <p>Joined: {user.createdAt}</p>
+      <h1 className="title2">Welcome, {user.username}!</h1>
+      <img src={user.avatar || "/images/account.svg"} alt="Profile Avatar" className="avatar" />
+          <p className="text" >Username: {user.username}</p>
+      <p className="text">Email: {user.email}</p>
+      <p className="text">Joined:
+        {/* {new Date  */}
+        {(user.createdAt)}
+        {/* .toLocaleDateString()} */}
+        </p>
                     <Link href="/edit"><FiSettings /> Edit Profile</Link>
       <button className="logout-btn">Logout</button>
     </div>

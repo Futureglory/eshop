@@ -1,7 +1,6 @@
 const User = require("../models/User");
 const sendEmail = require("../config/emailService");
 const multer = require("multer");
-const User = require("../models/User");
 
 exports.getUserDetails = async (req, res) => {
   try {

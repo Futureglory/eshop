@@ -3,21 +3,31 @@ import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
 const EditProfile = () => {
-  const [user, setUser] = useState({ username: "", email: "", avatar: "" });
+  const [user, setUser] = useState({
+     username: "", 
+     email: "", 
+     avatar: "" 
+    });
   const [profileImage, setProfileImage] = useState(null);
   const [error, setError] = useState("");
+    const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
     fetch("http://localhost:5000/api/users/profile", { credentials: "include" })
-      .then(response => response.json())
-      .then(data => setUser(data))
-      .catch(() => setUser(null));
+      .then((response) => response.json())
+      .then((data) => setUser({
+        username: data.username || "",
+        email: data.email || "",
+        avatar: data.avatar || ""
+      }))
+      .catch(() => setError("Failed to load profile"))
+      .finally(() => setLoading(false)); // ✅ End loading
   }, []);
 
-  if (!user) return <p>Please log in to edit your profile.</p>;
+  if (loading) return <p>Loading...</p>; // ✅ Don't render inputs yet
 
-   
+
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
@@ -58,10 +68,20 @@ const EditProfile = () => {
       <h1>Edit Your Profile</h1>
       <form onSubmit={handleSubmit}>
         <label>Username:</label>
-        <input type="text" name="username" value={user.username} onChange={(e) => setUser({ ...user, username: e.target.value })} />
+        <input 
+        type="text"
+         name="username" 
+         value={user.username}
+          onChange={(e) => setUser({ ...user, username: e.target.value })}
+          />
 
         <label>Email:</label>
-        <input type="email" name="email" value={user.email} onChange={(e) => setUser({ ...user, email: e.target.value })} />
+        <input 
+        type="email"
+         name="email"
+          value={user.email} 
+          onChange={(e) => setUser({ ...user, email: e.target.value })}
+         />
 
         <label>Profile Image:</label>
         <input type="file" accept="image/*" onChange={handleImageChange} />

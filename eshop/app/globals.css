@@ -909,17 +909,24 @@ MARGIN-LEFT:7%;
 
 /* profile*/
 .profile-page {
+  margin-top: 10%;
   display: flex;
   flex-direction: column;
   align-items: center;
 }
+.text{
+  color:black;
 
+}
 .avatar {
-  width: 80px;
+  width: 90px;
   height: 80px;
   border-radius: 50%;
 }
-
+.title2{
+  color: blue;
+  font-size: 36px;
+}
 .logout-btn {
   padding: 8px;
   border: none;
