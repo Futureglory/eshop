@@ -13,6 +13,7 @@ import Link from "next/link";
 // import { ThemeContext } from './context/Themecontext';
 
 export default function Home() {
+    const [user, setUser] = useState(null);
   const { isAuthenticated } = useAuth();
   const [mounted, setMounted] = useState(false);
   const { theme, setTheme } = useTheme();
@@ -40,19 +41,23 @@ export default function Home() {
           <h1 className="title">Eshop</h1>
           <p className="subtitle">Wear Confidence. Own Your Style.</p>
           <div className="buttons">
-           <Link href="/signup">
-             <button className="signupButton">Sign Up</button>
-           </Link>
-           <Link href="/login">
-             <button className="loginButton">Log In</button>
-           </Link>
-           <button onClick={toggleTheme} className="themeToggle">
-             {theme === "light" ? <FiMoon size={18} /> : <FiSun size={18} />}
-           </button>
-         </div>
-       </span>
-      
-       <NavBar />
+            {!user && (
+              <>
+                <Link href="/signup">
+                  <button className="signupButton">Sign Up</button>
+                </Link>
+                <Link href="/login">
+                  <button className="loginButton">Log In</button>
+                </Link>
+              </>
+            )}
+            <button onClick={toggleTheme} className="themeToggle">
+              {theme === "light" ? <FiMoon size={18} /> : <FiSun size={18} />}
+            </button>
+          </div>
+        </span>
+
+        <NavBar />
         {/* <Hero />
         <ProductShowcase /> */}
 
@@ -62,7 +67,7 @@ export default function Home() {
 
 
 
-       {/* <footer className="footer">
+        {/* <footer className="footer">
           <p>&copy; 2023 Eshop. All rights reserved.</p>
           <Link href="/privacy-policy">Privacy Policy</Link>
           <Link href="/terms-of-service">Terms of Service</Link>

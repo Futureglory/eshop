@@ -29,7 +29,7 @@ const upload = multer({ dest: "uploads/" });
 router.put("/update", authMiddleware, userController.updateUserProfile);
 
 // Protected profile routes
-router.get("/profile", protect, getUserProfile);
+router.get("/profile", authMiddleware, getUserProfile);
 router.put("/profile/password", authMiddleware, updatePassword);
 router.put("/profile/update", authMiddleware, upload.single("avatar"), updateUserProfile);
 
@@ -37,7 +37,7 @@ router.put("/profile/update", authMiddleware, upload.single("avatar"), updateUse
 router.get("/account", authMiddleware, getUserDetails); // Requires authenticatio
 
 router.post("/signup", signup);
-router.post("/login", login);
+router.post("/login", loginUser);
 router.post("/logout", authMiddleware, logout);
 router.post("/otp", verifyOtp);
 router.post("/resend-otp", resendOtp);

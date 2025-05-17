@@ -909,7 +909,7 @@ MARGIN-LEFT:7%;
 
 /* profile*/
 .profile-page {
-  margin-top: 10%;
+  margin-top: 5%;
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -1169,7 +1169,95 @@ h1 {
 
 
 
+/*edit*/
+/* globals.css */
 
+.edit-profile-container {
+  max-width: 600px;
+  margin: 40px auto;
+  padding: 30px;
+  background-color: #fff;
+  border-radius: 16px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.edit-profile-title {
+  font-size: 24px;
+  font-weight: bold;
+  text-align: center;
+  margin-bottom: 25px;
+  color: #333;
+}
+
+.edit-profile-form .form-group {
+  margin-bottom: 20px;
+}
+
+.edit-profile-form label {
+  display: block;
+  margin-bottom: 6px;
+  font-weight: 600;
+  color: #444;
+}
+
+.edit-profile-form input[type="text"],
+.edit-profile-form input[type="email"],
+.edit-profile-form input[type="file"] {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid #ccc;
+  border-radius: 8px;
+  font-size: 14px;
+}
+
+.avatar-preview-container {
+  margin-top: 10px;
+}
+
+.avatar-preview-container p {
+  font-size: 14px;
+  color: #555;
+  margin-bottom: 6px;
+}
+
+.avatar-preview {
+  width: 96px;
+  height: 96px;
+  border-radius: 50%;
+  object-fit: cover;
+  border: 2px solid #eee;
+}
+
+.error-text {
+  color: #e53e3e;
+  font-size: 14px;
+  margin-top: 10px;
+}
+
+.submit-button {
+  display: block;
+  width: 100%;
+  background-color: #4f46e5;
+  color: white;
+  padding: 12px;
+  font-size: 16px;
+  font-weight: 600;
+  border: none;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: background 0.2s ease-in-out;
+}
+
+.submit-button:hover {
+  background-color: #4338ca;
+}
+
+.loading-text {
+  text-align: center;
+  color: #555;
+  font-size: 16px;
+  margin-top: 40px;
+}
 
 
 

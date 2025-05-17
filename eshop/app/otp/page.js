@@ -65,7 +65,7 @@ const OtpVerification = () => {
   return (
     <div className="otp-container">
       <h2>OTP Verification</h2>
-      <p>Enter the 5-digit OTP sent to {email}.</p>
+      <p>Enter the 6-digit OTP sent to {email}.</p>
       {error && <p className="error-message">{error}</p>}
       <form onSubmit={handleSubmit}>
         <div className="otpInput">

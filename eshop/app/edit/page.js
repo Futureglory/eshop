@@ -4,13 +4,13 @@ import { useRouter } from "next/navigation";
 
 const EditProfile = () => {
   const [user, setUser] = useState({
-     username: "", 
-     email: "", 
-     avatar: "" 
-    });
+    username: "",
+    email: "",
+    avatar: ""
+  });
   const [profileImage, setProfileImage] = useState(null);
   const [error, setError] = useState("");
-    const [loading, setLoading] = useState(true);
+  const [loading, setLoading] = useState(true);
   const router = useRouter();
 
   useEffect(() => {
@@ -38,7 +38,7 @@ const EditProfile = () => {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     const formData = new FormData();
     formData.append("username", user.username);
     formData.append("email", user.email);
@@ -63,36 +63,45 @@ const EditProfile = () => {
     }
   };
 
- return (
-    <div className="edit-profile">
-      <h1>Edit Your Profile</h1>
-      <form onSubmit={handleSubmit}>
-        <label>Username:</label>
-        <input 
-        type="text"
-         name="username" 
-         value={user.username}
-          onChange={(e) => setUser({ ...user, username: e.target.value })}
+  return (
+    <div className="edit-profile-container">
+      <h1 className="edit-profile-title" >Edit Your Profile</h1>
+      <form onSubmit={handleSubmit} className="edit-profile-form">
+        <div className="form-group">
+          <label>Username:</label>
+          <input
+            type="text"
+            name="username"
+            value={user.username}
+            onChange={(e) => setUser({ ...user, username: e.target.value })}
           />
-
-        <label>Email:</label>
-        <input 
-        type="email"
-         name="email"
-          value={user.email} 
-          onChange={(e) => setUser({ ...user, email: e.target.value })}
-         />
-
+        </div>
+        <div className="form-group">
+          <label>Email:</label>
+          <input
+            type="email"
+            name="email"
+            value={user.email}
+            onChange={(e) => setUser({ ...user, email: e.target.value })}
+          />
+        </div>
+        <div className="form-group"></div>
         <label>Profile Image:</label>
         <input type="file" accept="image/*" onChange={handleImageChange} />
-
-        {user.avatar && <img src={user.avatar} alt="Profile Preview" className="avatar-preview" />}
-
-        {error && <p className="error">{error}</p>}
-
-        <button type="submit">Save Changes</button>
-      </form>
     </div>
+    {
+    user.avatar && (
+      <div className="avatar-preview-container">
+        <p>Image Preview:</p>
+        <img src={user.avatar} alt="Profile Preview" className="avatar-preview" />}
+      </div>
+    )
+  }
+  { error && <p className="error-text">{error}</p> }
+
+  <button type="submit" className="submit-button">Save Changes</button>
+      </form >
+    </div >
   );
 
 };

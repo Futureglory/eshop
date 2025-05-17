@@ -74,11 +74,11 @@ exports.verifyOtp = async (req, res) => {
 
     res.status(200).json({ message: "OTP verified. Account is now active." });
   } catch (err) {
-  if (process.env.NODE_ENV !== "production") {
-    console.error(err);
+    if (process.env.NODE_ENV !== "production") {
+      console.error(err);
+    }
+    res.status(500).json({ message: "Server error" });
   }
-  res.status(500).json({ message: "Server error" });
-}
 
 };
 
@@ -127,19 +127,28 @@ exports.login = async (req, res) => {
 
     if (!user.isVerified) return res.status(401).json({ message: "Please verify your email first" });
 
- const token = generateToken(user.id);
-setTokenCookie(res, token); // Uses your helper function
+   const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+      expiresIn: "1d",
+    });
+
+    // ✅ Set token in HTTP-only cookie
+    res.cookie("jwt", token, {
+      httpOnly: true,
+      secure: process.env.NODE_ENV === "production", // Only send over HTTPS in production
+      sameSite: "strict",
+      maxAge: 24 * 60 * 60 * 1000, // 1 day
+    });
 
     return res.status(200).json({
       message: "Login successful",
-      user: { id: user.id, email: user.email } 
+      user: { id: user.id, email: user.email }
     });
 
-} catch (err) {
-  console.error("Login error:", err);
-  res.status(500).json({ message: "Server error" });
-};
-
+  } catch (err) {
+    console.error("Login error:", err);
+    res.status(500).json({ message: "Server error" });
+  };
+}
 exports.logout = (req, res) => {
   res.cookie("jwt", "", { httpOnly: true, expires: new Date(0) });
   res.status(200).json({ message: "Logged out successfully" });
@@ -190,12 +199,12 @@ exports.resetPassword = async (req, res) => {
     await user.save();
 
     res.status(200).json({ message: "Password has been reset" });
-} catch (err) {
-  if (process.env.NODE_ENV !== "production") {
-    console.error(err);
+  } catch (err) {
+    if (process.env.NODE_ENV !== "production") {
+      console.error(err);
+    }
+    res.status(500).json({ message: "Server error" });
   }
-  res.status(500).json({ message: "Server error" });
-}
 
 };
 
@@ -222,8 +231,8 @@ exports.updateProfile = async (req, res) => {
 
   try {
     if (!req.user || !req.user.id) {
-     return res.status(401).json({ message: "Unauthorized" });
-   }
+      return res.status(401).json({ message: "Unauthorized" });
+    }
     const { username, email } = req.body;
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -242,7 +251,7 @@ exports.updatePassword = async (req, res) => {
   try {
     if (!req.user || !req.user.id) {
       return res.status(401).json({ message: "Unauthorized" });
-   }
+    }
     const { currentPassword, newPassword } = req.body;
     const user = await User.findByPk(req.user.id);
     if (!user) return res.status(404).json({ message: "User not found" });
@@ -291,7 +300,7 @@ exports.requestPasswordReset = async (req, res) => {
       <p>Please click the link below to reset your password:</p>
       <a href="${resetUrl}">${resetUrl}</a>
       <p>This link will expire in 15 minutes.</p>
-    `};
+    `;
 
     await sendEmail({
       to: email,
@@ -307,18 +316,17 @@ exports.requestPasswordReset = async (req, res) => {
 };
 
 exports.sendPasswordResetEmail = async (userEmail, resetLink) => {
-    const message = `Hello,
+  const message = `Hello,
 
    You have requested a password reset. Please click the link below to reset your password:
    ${resetLink}
 
    If you did not request this, please ignore this email.`;
 
-    await sendEmail({
-      to: userEmail,
-      subject: "Password Reset Request",
-      text: message,
-      // html: `<p>${message}</p>`, // Optionally, use HTML content
-    });
-  }
+  await sendEmail({
+    to: userEmail,
+    subject: "Password Reset Request",
+    text: message,
+    // html: `<p>${message}</p>`, // Optionally, use HTML content
+  });
 }

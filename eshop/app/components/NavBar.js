@@ -56,7 +56,7 @@ const NavBar = () => {
   }, []);
 
   useEffect(() => {
-    fetch("http://localhost:5000/api/users/account", { credentials: "include" })
+    fetch("http://localhost:5000/api/users/profile", { credentials: "include" })
       .then(response => response.json())
       .then(data => setUser(data))
       .catch(() => setUser(null));

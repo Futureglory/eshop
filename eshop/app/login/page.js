@@ -23,26 +23,31 @@ const Login = () => {
 
   const togglePassword = () => setShowPassword(!showPassword);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
-    try {
-      await fetch("http://localhost:5000/api/users/login", { email: credentials.email, password: credentials.password }, { withCredentials: true });
-      console.log("Login successful");
-      // method: "POST",
-      // headers: { "Content-Type": "application/json" },
-      // credentials: "include",
-      // body: JSON.stringify({
-      //   email: credentials.email,
-      //   password: credentials.password
-      // }),
-      router.push("/");
+ const handleSubmit = async (e) => {
+  e.preventDefault();
+  try {
+    const response = await fetch("http://localhost:5000/api/users/login", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      credentials: "include",
+      body: JSON.stringify({
+        email: credentials.email,
+        password: credentials.password
+      }),
+    });
 
-    } catch (error) {
-      setError("Login failed. Try again.");
-      console.error("Login error:", error);
+    if (!response.ok) {
+      throw new Error("Login failed");
     }
 
-  };
+    const data = await response.json();
+    console.log("Login successful:", data);
+    router.push("/");
+  } catch (error) {
+    setError("Login failed. Try again.");
+    console.error("Login error:", error);
+  }
+};
 
 
 

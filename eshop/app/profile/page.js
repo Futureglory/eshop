@@ -11,70 +11,68 @@ const Profile = () => {
   const router = useRouter();
 
   // Fetch user profile
-useEffect(() => {
-  const fetchProfile = async () => {
-    try {
-      const token = document.cookie.split("; ").find(row => row.startsWith("jwt="))?.split("=")[1];
+  useEffect(() => {
+    const fetchProfile = async () => {
+      try {
+        const res = await fetch("http://localhost:5000/api/users/profile", {
+          method: 'GET',
+          credentials: 'include', // ✅ Important: sends HTTP-only cookies
+        });
 
-      if (!token) {
-        console.error("No authentication token found! Please log in.");
-        return;
+        const contentType = res.headers.get("content-type");
+        if (!contentType || !contentType.includes("application/json")) {
+          const text = await res.text(); // log unexpected HTML
+          console.error("Expected JSON, got:", text);
+          return;
+        }
+
+        if (res.status === 401) {
+          console.error("User not authenticated. Please log in.");
+          return router.push("/login");;
+        }
+
+        const data = await res.json();
+        console.log("Profile data:", data);
+        // Set state here with user info
+      } catch (err) {
+        console.error("Error fetching profile:", err);
       }
+    };
 
-      const response = await fetch("http://localhost:5000/api/users/profile", {
-        method: "GET",
+    fetchProfile();
+  }, []);
+
+  const handleLogout = async () => {
+    try {
+      const response = await fetch("http://localhost:5000/api/users/logout", {
+        method: "POST",
         credentials: "include",
-        headers: {
-          "Content-Type": "application/json",
-          Authorization: `Bearer ${token}`,
-        },
       });
 
-      const data = await response.json();
-
       if (response.ok) {
-        setUser(data.user);
-      } else {
-        console.error("Error fetching profile:", data.message);
+        setUser(null); // Clear user session
+        router.push("/login"); // Redirect user after logout
       }
     } catch (err) {
-      console.error("Network error:", err);
+      console.error("Logout failed:", err);
     }
   };
 
-  fetchProfile();
-}, []);
-
-const handleLogout = async () => {
-  try {
-    const response = await fetch("http://localhost:5000/api/users/logout", {
-      method: "POST",
-      credentials: "include",
-    });
-
-    if (response.ok) {
-      setUser(null); // Clear user session
-      router.push("/login"); // Redirect user after logout
-    }
-  } catch (err) {
-    console.error("Logout failed:", err);
+  if (!user) {
+    return <p>Loading profile...</p>; // Show loading or redirecting
   }
-};
 
- 
   return (
     <div className="profile-page">
       <h1 className="title2">Welcome, {user.username}!</h1>
       <img src={user.avatar || "/images/account.svg"} alt="Profile Avatar" className="avatar" />
-          <p className="text" >Username: {user.username}</p>
+      <p className="text" >Username: {user.username}</p>
       <p className="text">Email: {user.email}</p>
       <p className="text">Joined:
-        {/* {new Date  */}
-        {(user.createdAt)}
-        {/* .toLocaleDateString()} */}
-        </p>
-                    <Link href="/edit"><FiSettings /> Edit Profile</Link>
-      <button className="logout-btn">Logout</button>
+        {new Date(user.createdAt).toLocaleDateString()}
+      </p>
+      <Link href="/edit"><FiSettings /> Edit Profile</Link>
+      <button className="logout-btn" onClick={handleLogout}>Logout</button>
     </div>
   );
 

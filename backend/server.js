@@ -7,20 +7,22 @@ const cookieParser = require('cookie-parser');
 const authRoutes = require("./routes/authRoutes");
 
 const app = express();
+app.use(express.json());
+app.use(cookieParser()); // Middleware to parse cookies
 
 app.use(cors({
   origin: 'http://localhost:3000', // explicitly specify your frontend origin
   credentials: true // allow cookies or authorization headers
 }));
 
-app.use(express.json());
-app.use(cookieParser()); // Middleware to parse cookies
 
 // Routes
 app.use("/api/users", userRoutes);
 
 app.use('/api/auth', authRoutes);
 
+const accountRoutes = require('./routes/accountRoutes');
+app.use('/api/account', accountRoutes);
 
 
 // Sync Database & Start Server
