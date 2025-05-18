@@ -3,7 +3,7 @@ const express = require("express");
 const router = express.Router();
 const {
   signup,
-  login,
+  loginUser,
   verifyOtp,
   resendOtp,
   forgotPassword,
@@ -16,7 +16,7 @@ const { authMiddleware } = require("../middleware/authMiddleware");
 
 // Auth & OTP
 router.post("/signup", signup);
-router.post("/login", login);
+router.post("/login", loginUser);
 router.post("/logout", authMiddleware, logout);
 router.post("/otp", verifyOtp);
 router.post("/resend-otp", resendOtp);

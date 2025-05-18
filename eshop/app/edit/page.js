@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useState, useEffect } from "react";
 import { useRouter } from "next/navigation";
 
@@ -16,23 +16,22 @@ const EditProfile = () => {
   useEffect(() => {
     fetch("http://localhost:5000/api/users/profile", { credentials: "include" })
       .then((response) => response.json())
-      .then((data) => setUser({
-        username: data.username || "",
-        email: data.email || "",
-        avatar: data.avatar || ""
-      }))
+      .then((data) =>
+        setUser({
+          username: data.username || "",
+          email: data.email || "",
+          avatar: data.avatar || ""
+        })
+      )
       .catch(() => setError("Failed to load profile"))
-      .finally(() => setLoading(false)); // ✅ End loading
+      .finally(() => setLoading(false));
   }, []);
-
-  if (loading) return <p>Loading...</p>; // ✅ Don't render inputs yet
-
 
   const handleImageChange = (e) => {
     const file = e.target.files[0];
     if (file) {
       setProfileImage(file);
-      setUser({ ...user, avatar: URL.createObjectURL(file) }); // Show preview
+      setUser({ ...user, avatar: URL.createObjectURL(file) }); // Preview
     }
   };
 
@@ -56,16 +55,18 @@ const EditProfile = () => {
         alert("Profile updated successfully!");
         router.push("/profile");
       } else {
-        setError("Failed to update profile.");
+        setError(data.message || "Failed to update profile.");
       }
     } catch (err) {
       setError("Something went wrong.");
     }
   };
 
+  if (loading) return <p className="loading-text">Loading...</p>;
+
   return (
     <div className="edit-profile-container">
-      <h1 className="edit-profile-title" >Edit Your Profile</h1>
+      <h1 className="edit-profile-title">Edit Your Profile</h1>
       <form onSubmit={handleSubmit} className="edit-profile-form">
         <div className="form-group">
           <label>Username:</label>
@@ -76,6 +77,7 @@ const EditProfile = () => {
             onChange={(e) => setUser({ ...user, username: e.target.value })}
           />
         </div>
+
         <div className="form-group">
           <label>Email:</label>
           <input
@@ -85,25 +87,25 @@ const EditProfile = () => {
             onChange={(e) => setUser({ ...user, email: e.target.value })}
           />
         </div>
-        <div className="form-group"></div>
-        <label>Profile Image:</label>
-        <input type="file" accept="image/*" onChange={handleImageChange} />
+
+        <div className="form-group">
+          <label>Profile Image:</label>
+          <input type="file" accept="image/*" onChange={handleImageChange} />
+        </div>
+
+        {user.avatar && (
+          <div className="avatar-preview-container">
+            <p>Image Preview:</p>
+            <img src={user.avatar} alt="Profile Preview" className="avatar-preview" />
+          </div>
+        )}
+
+        {error && <p className="error-text">{error}</p>}
+
+        <button type="submit" className="submit-button">Save Changes</button>
+      </form>
     </div>
-    {
-    user.avatar && (
-      <div className="avatar-preview-container">
-        <p>Image Preview:</p>
-        <img src={user.avatar} alt="Profile Preview" className="avatar-preview" />}
-      </div>
-    )
-  }
-  { error && <p className="error-text">{error}</p> }
-
-  <button type="submit" className="submit-button">Save Changes</button>
-      </form >
-    </div >
   );
-
 };
 
 export default EditProfile;

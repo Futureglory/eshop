@@ -10,7 +10,7 @@ const {
   forgotPassword,
   requestPasswordReset,
   resetPassword,
-  login,
+  loginUser,
   logout,
   // Profile routes 
 

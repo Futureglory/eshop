@@ -1186,7 +1186,7 @@ h1 {
   font-weight: bold;
   text-align: center;
   margin-bottom: 25px;
-  color: #333;
+  color: #4338ca;
 }
 
 .edit-profile-form .form-group {
@@ -1237,7 +1237,7 @@ h1 {
 .submit-button {
   display: block;
   width: 100%;
-  background-color: #4f46e5;
+  background-color: #ffc400;
   color: white;
   padding: 12px;
   font-size: 16px;
@@ -1249,7 +1249,8 @@ h1 {
 }
 
 .submit-button:hover {
-  background-color: #4338ca;
+  background-color:white ;
+  color: black;
 }
 
 .loading-text {
