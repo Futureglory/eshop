@@ -9,7 +9,7 @@ const Login = () => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [user, setUser] = useState(null); // Initialize user state to null
-  const [credentials, setCredentials] = useState({ email: "", password: "" });
+  const [credentials, setCredentials] = useState({ email: "", password: "", rememberDevice: "" });
   const [showPassword, setShowPassword] = useState(false);
 
 
@@ -25,33 +25,42 @@ const Login = () => {
 
  const handleSubmit = async (e) => {
   e.preventDefault();
-  try {
+
     const response = await fetch("http://localhost:5000/api/users/login", {
       method: "POST",
+        credentials: "include",
       headers: { "Content-Type": "application/json" },
-      credentials: "include",
       body: JSON.stringify({
-        email: credentials.email,
-        password: credentials.password
+        email, password, rememberDevice
       }),
     });
+ const data = await response.json();
 
-    if (!response.ok) {
-      throw new Error("Login failed");
-    }
-
-    const data = await response.json();
+  if (response.ok) {
     console.log("Login successful:", data);
-    router.push("/");
-  } catch (error) {
-    setError("Login failed. Try again.");
-    console.error("Login error:", error);
+    window.location.href = "/home"; // ✅ Redirects to home page
+  } else {
+    console.error("Login failed:", data.message);
   }
 };
 
+const checkSessionExpiration = async () => {
+  const response = await fetch("http://localhost:5000/api/users/profile", {
+    method: "GET",
+    credentials: "include",
+  });
 
+  const data = await response.json();
 
+  if (response.status === 401) {
+    alert("Session expired. Please log in again.");
+document.cookie = `jwt=${token}; path=/; max-age=${24 * 60 * 60};`;
+    window.location.href = "/login"; // Redirect to login page
+  }
+};
 
+// Check session every 10 minutes
+setInterval(checkSessionExpiration, 10 * 60 * 1000);
 
   return (
     <div className="login-container">
@@ -88,7 +97,7 @@ const Login = () => {
           <label className="remember-label">
             <input
               type="checkbox"
-              name="remember"
+              name="rememberDevice"
               checked={credentials.remember || false}
               onChange={(e) =>
                 setCredentials({ ...credentials, remember: e.target.checked })

@@ -20,7 +20,7 @@ const {
 
 } = require("../controllers/authController");
 const { getUserDetails,   updateUserProfile, } = require("../controllers/userController");
-const { authMiddleware, protect } = require("../middleware/authMiddleware");
+const { authMiddleware } = require("../middleware/authMiddleware");
 const multer = require("multer");
 
 
@@ -33,6 +33,10 @@ router.get("/profile", authMiddleware, getUserProfile);
 router.put("/profile/password", authMiddleware, updatePassword);
 router.put("/profile/update", authMiddleware, upload.single("avatar"), updateUserProfile);
 
+
+router.get("/profile", authMiddleware, async (req, res) => {
+  res.json({ user: req.user });
+});
 
 router.get("/account", authMiddleware, getUserDetails); // Requires authenticatio
 

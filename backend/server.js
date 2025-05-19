@@ -11,8 +11,8 @@ app.use(express.json());
 app.use(cookieParser()); // Middleware to parse cookies
 
 app.use(cors({
-  origin: 'http://localhost:3000', // explicitly specify your frontend origin
-  credentials: true // allow cookies or authorization headers
+  origin: 'http://localhost:3000',
+  credentials: true,
 }));
 
 

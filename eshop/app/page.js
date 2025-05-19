@@ -32,6 +32,24 @@ export default function Home() {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
+const fetchUserSession = async () => {
+  const response = await fetch("http://localhost:5000/api/users/profile", {
+    method: "GET",
+    credentials: "include", // ✅ Ensures cookies are sent
+  });
+
+  const data = await response.json();
+
+  if (response.ok) {
+    console.log("Session active:", data.user); // ✅ Get user details
+  } else {
+    console.error("Session expired or invalid:", data.message);
+    window.location.href = "/login"; // Redirect to login if session is invalid
+  }
+};
+
+// Call function on page load
+fetchUserSession();
 
   return (
 

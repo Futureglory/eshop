@@ -1,4 +1,4 @@
-const { DataTypes } = require("sequelize");
+const {Sequelize, DataTypes } = require("sequelize");
 const sequelize = require("../config/database");
 const crypto = require("crypto");
 
@@ -24,6 +24,12 @@ passwordResetExpires: {
   type: DataTypes.DATE,
   allowNull: true,
 },
+lastLoginIp: { type: DataTypes.STRING },
+  lastLoginDevice: { type: DataTypes.STRING },
+  trustedDevices: { type: DataTypes.JSON }, // ✅ Stores trusted devices
+  loginVerificationToken: { type: DataTypes.STRING },
+  loginVerificationTokenExpiresAt: { type: DataTypes.DATE },
+
 }, {
   timestamps: true,
 });
