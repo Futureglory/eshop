@@ -21,7 +21,6 @@ const sendAccountCreatedEmail = async (user) => {
   await sendEmail(user.email, "Your Eshop Account Details", emailContent);
 };
 
-
 exports.signup = async (req, res) => {
   try {
     const { username, email, password } = req.body;
@@ -115,7 +114,7 @@ exports.resendOtp = async (req, res) => {
 
 exports.loginUser = async (req, res) => {
   try {
-    const { email, password } = req.body;
+    const { email, password,rememberDevice } = req.body;
     const userAgent = req.headers["user-agent"]; // ✅ Get user device info
     const ipAddress = req.ip; // ✅ Get user's IP address
 
@@ -130,13 +129,14 @@ exports.loginUser = async (req, res) => {
 
     if (!user.isVerified) { return res.status(401).json({ message: "Please verify your email first" }); }
 
+    const generateVerificationToken = () => crypto.randomBytes(32).toString("hex");
+
     const isTrustedDevice = user.trustedDevices?.some(device => device.userAgent === userAgent && device.ip === ipAddress);
-
-    if (!isTrustedDevice) {
-      const verificationToken = crypto.randomBytes(32).toString("hex");
+  if (!isTrustedDevice) {
+      const verificationToken = generateVerificationToken();
       user.loginVerificationToken = verificationToken;
+      user.loginVerificationTokenExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // Expires in 10 minutes
       await user.save();
-
 
       await sendEmail(
         email,
@@ -150,7 +150,7 @@ exports.loginUser = async (req, res) => {
       return res.status(403).json({ message: "New login detected. Please verify via email." });
     }
 
-    const token = jwt.sign({ id: user.id }, process.env.JWT_SECRET, {
+    const token = jwt.sign({ id: user.id, email: user.email  }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
 
@@ -171,9 +171,9 @@ exports.loginUser = async (req, res) => {
 
     await user.save();
 
-    return res.status(200).json({
+     res.status(200).json({
       message: "Login successful",
-      user: { id: user.id, username: user.username, email: user.email }
+      user: { id: user.id, email: user.email }
     });
 
   } catch (err) {
@@ -181,69 +181,6 @@ exports.loginUser = async (req, res) => {
     res.status(500).json({ message: "Server error" });
   };
 }
-const generateVerificationToken = () => crypto.randomBytes(32).toString("hex");
-
-exports.loginUser = async (req, res) => {
-  try {
-    const { email, password } = req.body;
-    const userAgent = req.headers["user-agent"];
-    const ipAddress = req.ip;
-
-    if (!email || !password) {
-      return res.status(400).json({ message: "Email and password required" });
-    }
-
-    const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) return res.status(401).json({ message: "Invalid email or password" });
-
-    if (!user.isVerified) return res.status(401).json({ message: "Please verify your email first" });
-
-    // ✅ Check if login is from a new device
-    const isTrustedDevice = user.trustedDevices?.some(device => device.userAgent === userAgent && device.ip === ipAddress);
-    
-    if (!isTrustedDevice) {
-      const verificationToken = generateVerificationToken();
-      user.loginVerificationToken = verificationToken;
-      user.loginVerificationTokenExpiresAt = new Date(Date.now() + 10 * 60 * 1000); // Expires in 10 minutes
-      await user.save();
-
-      await sendEmail(
-        email,
-        "New Login Attempt Detected",
-        `<p>We've detected a login attempt from a new device or location.</p>
-         <p>If this was you, click below to verify your login:</p>
-         <a href="http://localhost:3000/verify-login?token=${verificationToken}">Verify Login</a>
-         <p>If this wasn't you, please secure your account immediately.</p>`
-      );
-
-      return res.status(403).json({ message: "New login detected. Please verify via email." });
-    }
-
-    const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
-      expiresIn: "1d",
-    });
-
-    res.cookie("jwt", token, {
-      httpOnly: true,
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Lax",
-      maxAge: 24 * 60 * 60 * 1000,
-    });
-
-    user.lastLoginIp = ipAddress;
-    user.lastLoginDevice = userAgent;
-    await user.save();
-
-    res.status(200).json({ message: "Login successful", user });
-
-  } catch (err) {
-    console.error("Login error:", err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
 
 exports.verifyLoginAttempt = async (req, res) => {
   try {
@@ -272,34 +209,6 @@ exports.logout = (req, res) => {
     maxAge: 0, // ✅ Expire immediately 
     });
   res.status(200).json({ message: "Logged out successfully" });
-};
-
-exports.forgotPassword = async (req, res) => {
-  try {
-    const { email } = req.body;
-    const user = await User.findOne({ where: { email } });
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const resetToken = crypto.randomBytes(32).toString("hex");
-    const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
-    const resetTokenExpires = new Date(Date.now() + 10 * 60 * 1000);
-
-    user.resetToken = hashedToken;
-    user.resetTokenExpires = resetTokenExpires;
-    await user.save();
-
-    const resetURL = `${process.env.FRONTEND_URL}/reset-password?token=${resetToken}&email=${email}`;
-    await sendEmail(
-      email,
-      "Password Reset",
-      `<p>Reset your password using the link below:</p><a href="${resetURL}">${resetURL}</a><p>This link will expire in 10 minutes.</p>`
-    );
-
-    res.status(200).json({ message: "Password reset email sent" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-  }
 };
 
 exports.resetPassword = async (req, res) => {
@@ -365,30 +274,33 @@ const sendProfileUpdateEmail = async (user) => {
   await sendEmail(user.email, "Profile Update Confirmation", emailContent);
 };
 
-
-exports.updateProfile = async (req, res) => {
+exports.updateUserProfile = async (req, res) => {
 
   try {
     if (!req.user || !req.user.id) {
-      return res.status(401).json({ message: "Unauthorized" });
+      return res.status(401).json({ message: "Unauthorized:  Please log in." });
     }
+
     const { username, email } = req.body;
+    const avatar = req.file ? `/uploads/${req.file.filename}` : req.user.avatar;
     const user = await User.findOne({ where: { email: req.user.email } });
     if (!user) return res.status(404).json({ message: "User not found" });
+    await User.update({ username, email, avatar }, { where: { email: req.user.email} });
 
     user.username = username || user.username;
     user.email = email || user.email;
     await user.save();
 
      await sendProfileUpdateEmail(user);
+   sendEmail(email, "Profile Updated", `Hi ${username}, your profile details have been updated.`);
 
     res.status(200).json({ message: "Profile updated successfully" });
   } catch (err) {
     console.error("Profile updated successfully", err);
-    res.status(500).json({ message: "Server error" });
+    res.status(500).json({ message: "Error updating profile.", err });
   }
 };
-const sendPasswordUpdateEmail = async (user) => {
+exports.sendPasswordUpdateEmail = async (user) => {
   const emailContent = `
     <h2>Password Successfully Changed</h2>
     <p>Dear ${user.username},</p>

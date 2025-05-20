@@ -4,33 +4,16 @@ const multer = require("multer");
 
 exports.getUserDetails = async (req, res) => {
   try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized: Please log in." });
+if (!req.user) {
+      return res.status(401).json({ message: "User not found." });
     }
 
-    const user = await User.findByPk(req.user.id, { attributes: ["name", "email", "avatar"] });
+    const {id, username, email, avatar, createdAt} = req.user;
+res.status(200).json({ user: {id, username, email, avatar, createdAt} });
 
-    res.json(user);
+
   } catch (error) {
     res.status(500).json({ message: "Error fetching user details.", error });
-  }
-};
-
-exports.updateUserProfile = async (req, res) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized: Please log in." });
-    }
-
-    const { username, email, avatar } = req.body;
-    await User.update({ username, email, avatar }, { where: { id: req.user.id } });
-
-    // Send email notification
-    sendEmail(email, "Profile Updated", `Hi ${name}, your profile details have been updated.`);
-
-    res.json({ message: "Profile updated successfully!" });
-  } catch (error) {
-    res.status(500).json({ message: "Error updating profile.", error });
   }
 };
 
@@ -46,19 +29,3 @@ const storage = multer.diskStorage({
 
 const upload = multer({ storage });
 
-exports.updateUserProfile = async (req, res) => {
-  try {
-    if (!req.user) {
-      return res.status(401).json({ message: "Unauthorized: Please log in." });
-    }
-
-    const { username, email } = req.body;
-    const avatar = req.file ? `/uploads/${req.file.filename}` : req.user.avatar;
-
-    await User.update({ username, email, avatar }, { where: { id: req.user.id } });
-
-    res.json({ message: "Profile updated successfully!" });
-  } catch (error) {
-    res.status(500).json({ message: "Error updating profile.", error });
-  }
-};

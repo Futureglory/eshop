@@ -13,30 +13,27 @@ const {
   loginUser,
   logout,
   // Profile routes 
+verifyLoginAttempt,
 
   getUserProfile,
-
+updateUserProfile,
+  sendPasswordResetEmail,
   updatePassword,
 
 } = require("../controllers/authController");
-const { getUserDetails,   updateUserProfile, } = require("../controllers/userController");
-const { authMiddleware } = require("../middleware/authMiddleware");
+const { getUserDetails } = require("../controllers/userController");
+const  authMiddleware  = require("../middleware/authMiddleware");
 const multer = require("multer");
 
 
 const upload = multer({ dest: "uploads/" });
 
-router.put("/update", authMiddleware, userController.updateUserProfile);
+router.put("/update", authMiddleware, authController.updateUserProfile);
 
 // Protected profile routes
 router.get("/profile", authMiddleware, getUserProfile);
 router.put("/profile/password", authMiddleware, updatePassword);
 router.put("/profile/update", authMiddleware, upload.single("avatar"), updateUserProfile);
-
-
-router.get("/profile", authMiddleware, async (req, res) => {
-  res.json({ user: req.user });
-});
 
 router.get("/account", authMiddleware, getUserDetails); // Requires authenticatio
 

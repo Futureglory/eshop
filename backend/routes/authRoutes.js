@@ -11,6 +11,10 @@ const {
   resetPassword,
   logout,
   updatePassword,
+  verifyLoginAttempt,
+  getUserProfile,
+  updateProfile,
+  sendPasswordResetEmail,
 } = require("../controllers/authController");
 const { authMiddleware } = require("../middleware/authMiddleware");
 
