@@ -24,6 +24,14 @@ passwordResetExpires: {
   type: DataTypes.DATE,
   allowNull: true,
 },
+resetToken: {
+  type: DataTypes.STRING,
+  allowNull: true,
+},
+resetTokenExpires: {
+  type: DataTypes.DATE,
+  allowNull: true,
+},
 lastLoginIp: { type: DataTypes.STRING },
   lastLoginDevice: { type: DataTypes.STRING },
   trustedDevices: { type: DataTypes.JSON }, // ✅ Stores trusted devices

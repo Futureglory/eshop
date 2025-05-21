@@ -1,50 +1,31 @@
 // routes/userRoutes.js
+
 const express = require("express");
 const router = express.Router();
-const userController = require("../controllers/userController"); // check the path!
-
-const {
-  signup,
-  verifyOtp,
-  resendOtp,
-  forgotPassword,
-  requestPasswordReset,
-  resetPassword,
-  loginUser,
-  logout,
-  // Profile routes 
-verifyLoginAttempt,
-
-  getUserProfile,
-updateUserProfile,
-  sendPasswordResetEmail,
-  updatePassword,
-
-} = require("../controllers/authController");
-const { getUserDetails } = require("../controllers/userController");
-const  authMiddleware  = require("../middleware/authMiddleware");
-const multer = require("multer");
+const authController = require("../controllers/authController");
+const userController = require("../controllers/userController");
+const authMiddleware = require("../middleware/authMiddleware");
+const upload = require("../middleware/multer"); // ✅ Adjust the path if needed
 
 
-const upload = multer({ dest: "uploads/" });
 
-router.put("/update", authMiddleware, authController.updateUserProfile);
+// --------- AUTHENTICATION ROUTES ---------
+router.post("/signup", authController.signup);
+router.post("/login", authController.loginUser);
+router.post("/logout", authMiddleware, authController.logout);
 
-// Protected profile routes
-router.get("/profile", authMiddleware, getUserProfile);
-router.put("/profile/password", authMiddleware, updatePassword);
-router.put("/profile/update", authMiddleware, upload.single("avatar"), updateUserProfile);
+router.post("/otp", authController.verifyOtp);
+router.post("/resend-otp", authController.resendOtp);
 
-router.get("/account", authMiddleware, getUserDetails); // Requires authenticatio
-
-router.post("/signup", signup);
-router.post("/login", loginUser);
-router.post("/logout", authMiddleware, logout);
-router.post("/otp", verifyOtp);
-router.post("/resend-otp", resendOtp);
+// --------- PASSWORD RESET ---------
 router.post("/forgot-password", forgotPassword);
-router.post("/request-reset", requestPasswordReset);
-router.post("/reset-password", resetPassword);
+router.post("/request-reset", authController.requestPasswordReset);
+router.post("/reset-password", authController.resetPassword);
+
+// --------- PROFILE ROUTES (Protected) ---------
+router.get("/profile", authMiddleware, userController.getUserDetails); // basic profile data
+router.put("/profile/update", authMiddleware, upload.single("avatar"), userController.updateUserProfile); // with avatar
+router.put("/profile/password", authMiddleware, authController.updatePassword); // update password
 
 
 module.exports = router;

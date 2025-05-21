@@ -4,7 +4,6 @@ const sequelize = require("./config/database");
 const userRoutes = require("./routes/userRoutes");
 require("dotenv").config();
 const cookieParser = require('cookie-parser');
-const authRoutes = require("./routes/authRoutes");
 
 const app = express();
 app.use(express.json());
@@ -19,7 +18,7 @@ app.use(cors({
 // Routes
 app.use("/api/users", userRoutes);
 
-app.use('/api/auth', authRoutes);
+// app.use('/api/auth', authRoutes);
 
 const accountRoutes = require('./routes/accountRoutes');
 app.use('/api/account', accountRoutes);

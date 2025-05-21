@@ -5,6 +5,7 @@ const jwt = require("jsonwebtoken");
 const bcrypt = require("bcryptjs");
 const { User } = require("../models");
 const sendEmail = require("../utils/sendEmail");
+const sendEmail = require("../config/emailService"); // You must have a function to send emails
 
 const sendAccountCreatedEmail = async (user) => {
   const emailContent = `
@@ -208,6 +209,7 @@ exports.logout = (req, res) => {
     sameSite: "Lax",
     maxAge: 0, // ✅ Expire immediately 
     });
+      res.clearCookie("token"); // Remove authentication token
   res.status(200).json({ message: "Logged out successfully" });
 };
 
@@ -236,106 +238,6 @@ exports.resetPassword = async (req, res) => {
   }
 
 };
-
-exports.getUserProfile = async (req, res) => {
-  try {
-    const token = req.cookies.jwt;
-    if (!token) return res.status(401).json({ message: "No token provided" });
-
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-   if (!decoded.email) return res.status(400).json({ message: "Invalid token structure." });
-
-    const user = await  User.findOne({
-      where: { email: decoded.email },
-      attributes: ["id", "username", "email", "isVerified"]
-    });
-
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    res.status(200).json({ user });
-  } catch (err) {
-    console.error(err);
-    res.status(401).json({ message: "Invalid token" });
-  }
-};
-
-const sendProfileUpdateEmail = async (user) => {
-  const emailContent = `
-    <h2>Your Eshop Profile Has Been Updated</h2>
-    <p>Dear ${user.username},</p>
-    <p>Your profile details have been successfully updated. Here are the latest details:</p>
-    <ul>
-      <li><b>Username:</b> ${user.username}</li>
-      <li><b>Email:</b> ${user.email}</li>
-    </ul>
-    <p>If you did not make this change, please contact support immediately.</p>
-  `;
-
-  await sendEmail(user.email, "Profile Update Confirmation", emailContent);
-};
-
-exports.updateUserProfile = async (req, res) => {
-
-  try {
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ message: "Unauthorized:  Please log in." });
-    }
-
-    const { username, email } = req.body;
-    const avatar = req.file ? `/uploads/${req.file.filename}` : req.user.avatar;
-    const user = await User.findOne({ where: { email: req.user.email } });
-    if (!user) return res.status(404).json({ message: "User not found" });
-    await User.update({ username, email, avatar }, { where: { email: req.user.email} });
-
-    user.username = username || user.username;
-    user.email = email || user.email;
-    await user.save();
-
-     await sendProfileUpdateEmail(user);
-   sendEmail(email, "Profile Updated", `Hi ${username}, your profile details have been updated.`);
-
-    res.status(200).json({ message: "Profile updated successfully" });
-  } catch (err) {
-    console.error("Profile updated successfully", err);
-    res.status(500).json({ message: "Error updating profile.", err });
-  }
-};
-exports.sendPasswordUpdateEmail = async (user) => {
-  const emailContent = `
-    <h2>Password Successfully Changed</h2>
-    <p>Dear ${user.username},</p>
-    <p>Your password was successfully updated. If you did not request this change, please reset your password immediately.</p>
-  `;
-
-  await sendEmail(user.email, "Password Change Notification", emailContent);
-};
-
-
-exports.updatePassword = async (req, res) => {
-  try {
-    if (!req.user || !req.user.id) {
-      return res.status(401).json({ message: "Unauthorized" });
-    }
-    const { currentPassword, newPassword } = req.body;
-    const user = await User.findOne({ where: { email: req.user.email } });
-    if (!user) return res.status(404).json({ message: "User not found" });
-
-    const isMatch = await bcrypt.compare(currentPassword, user.password);
-    if (!isMatch) return res.status(400).json({ message: "Current password is incorrect" });
-
-    user.password = await bcrypt.hash(newPassword, 10);
-    await user.save();
-
-     await sendPasswordUpdateEmail(user);
-
-    res.status(200).json({ message: "Password updated successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-  }
-};
-// In authController.js
-
 
 exports.requestPasswordReset = async (req, res) => {
   const { email } = req.body;
@@ -396,3 +298,46 @@ exports.sendPasswordResetEmail = async (userEmail, resetLink) => {
     // html: `<p>${message}</p>`, // Optionally, use HTML content
   });
 }
+
+exports.forgotPassword = async (req, res) => {
+  try {
+    const { email } = req.body;
+
+    // 1. Check if user exists
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      // Send same response to prevent email enumeration
+      return res.status(200).json({ message: "If your email exists, a reset link has been sent." });
+    }
+
+    // 2. Generate token
+    const resetToken = crypto.randomBytes(32).toString("hex");
+    const hashedToken = crypto.createHash("sha256").update(resetToken).digest("hex");
+
+    // 3. Set token and expiration on user model
+    user.resetToken = hashedToken;
+    user.resetTokenExpires = Date.now() + 10 * 60 * 1000; // Token valid for 10 minutes
+    await user.save();
+
+    // 4. Send email
+    const resetUrl = `http://localhost:3000/reset-password?token=${resetToken}&email=${user.email}`; // your frontend URL
+    const message = `
+      <h2>Password Reset</h2>
+      <p>Click the link below to reset your password:</p>
+      <a href="${resetUrl}">${resetUrl}</a>
+      <p>This link will expire in 10 minutes.</p>
+    `;
+
+    await sendEmail({
+      to: user.email,
+      subject: "Password Reset Request",
+      html: message,
+    });
+
+    res.status(200).json({ message: "If your email exists, a reset link has been sent." });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "Error sending password reset email", error });
+  }
+};

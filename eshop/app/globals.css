@@ -741,7 +741,7 @@ MARGIN-LEFT:7%;
   display: none;
 }
 
-.searchContainer:hover .searchInput {
+.searchContainer, .searchInput {
   display: block;
 }
 
@@ -910,13 +910,22 @@ MARGIN-LEFT:7%;
 /* profile*/
 .profile-page {
   margin-top: 5%;
-  display: flex;
+  /* display: flex; */
+  margin-left: 20px;
   flex-direction: column;
   align-items: center;
 }
 .text{
   color:black;
-
+}
+.privacy-container{
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-top: 20px;
+}
+.text2{
+  color:black
 }
 .bold{
   font-weight: bold;
