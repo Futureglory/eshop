@@ -1,6 +1,6 @@
 const express = require("express");
 const cors = require("cors");
-const sequelize = require("./config/database");
+const sequelize = require("./config/db");
 const userRoutes = require("./routes/userRoutes");
 require("dotenv").config();
 const cookieParser = require('cookie-parser');
@@ -25,7 +25,7 @@ app.use('/api/account', accountRoutes);
 
 
 // Sync Database & Start Server
-sequelize.authenticate()
+sequelize.authenticate({ } )
   .then(() => {
     console.log("Database connected successfully");
     return sequelize.sync();

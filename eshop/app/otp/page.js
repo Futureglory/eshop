@@ -5,7 +5,7 @@ import axios from 'axios';
 // import {useRouter} from "next/router"
 const OtpVerification = () => {
   const searchParams = useSearchParams();
-  const email = searchParams.get('email'); // Get email from query params
+  const email = searchParams.get('email'); 
   const [otp, setOtp] = useState(["", "", "", "", "", ""]);
   // Proper OTP state
   const [message, setMessage] = useState("");
@@ -35,7 +35,11 @@ const OtpVerification = () => {
     const fullOtp = otp.join(''); // Join OTP array into a string
 
     try {
-      await axios.post('http://localhost:5000/api/users/otp', { email, otp: fullOtp });
+const response = await axios.post(
+  `http://localhost:5000/api/users/verify-otp?email=${email}`,
+  { otp: enteredOtp },
+  { withCredentials: true }
+);
       router.push("/login");
     } catch (error) {
       setError(error.response?.data.error || "Invalid OTP");

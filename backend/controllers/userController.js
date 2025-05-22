@@ -1,4 +1,4 @@
-const User = require("../models/User");
+const {User} = require("../models");
 const sendEmail = require("../config/emailService");
 const multer = require("multer");
 
@@ -38,7 +38,6 @@ exports.getUserProfile = async (req, res) => {
     res.status(401).json({ message: "Invalid token" });
   }
 };
-
 
 exports.updateUserProfile = async (req, res) => {
 

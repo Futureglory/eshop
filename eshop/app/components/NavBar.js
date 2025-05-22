@@ -166,9 +166,12 @@ const NavBar = () => {
 
 
         <div className="searchContainer">
-          <FiSearch className="icon" onClick={() => setSearchOpen(!searchOpen)} ref={searchRef} />
+          <FiSearch 
+    className={`icon ${searchOpen ? "active" : ""}`}
+          onClick={() => setSearchOpen(!searchOpen)} 
+          />
           {searchOpen && (
-            <div className="searchBox">
+            <div className="searchBox" ref={searchRef}>
               <input
                 type="text"
                 className="searchInput"

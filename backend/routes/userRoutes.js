@@ -6,9 +6,24 @@ const authController = require("../controllers/authController");
 const userController = require("../controllers/userController");
 const authMiddleware = require("../middleware/authMiddleware");
 const upload = require("../middleware/multer"); // ✅ Adjust the path if needed
-
-
-
+const {
+  signup,
+  verifyOtp,
+  resendOtp,
+  loginUser,
+  logout,
+  verifyLoginAttempt,
+sendPasswordResetEmail,
+  resetPassword,  
+  forgotPassword
+} = require("../controllers/authController");
+const {
+getUserDetails,
+  updateUserProfile,
+  updatePassword,
+  sendProfileUpdateEmail,
+  sendPasswordUpdateEmail
+} = require("../controllers/userController");
 // --------- AUTHENTICATION ROUTES ---------
 router.post("/signup", authController.signup);
 router.post("/login", authController.loginUser);
@@ -19,13 +34,12 @@ router.post("/resend-otp", authController.resendOtp);
 
 // --------- PASSWORD RESET ---------
 router.post("/forgot-password", forgotPassword);
-router.post("/request-reset", authController.requestPasswordReset);
-router.post("/reset-password", authController.resetPassword);
+router.post("/reset-password", resetPassword);
 
 // --------- PROFILE ROUTES (Protected) ---------
 router.get("/profile", authMiddleware, userController.getUserDetails); // basic profile data
 router.put("/profile/update", authMiddleware, upload.single("avatar"), userController.updateUserProfile); // with avatar
-router.put("/profile/password", authMiddleware, authController.updatePassword); // update password
+router.put("/profile/password", authMiddleware, userController.updatePassword); // update password
 
 
 module.exports = router;

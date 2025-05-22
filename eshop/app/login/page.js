@@ -9,7 +9,10 @@ const Login = () => {
   const router = useRouter();
   const [error, setError] = useState("");
   const [user, setUser] = useState(null); // Initialize user state to null
-  const [credentials, setCredentials] = useState({ email: "", password: "", rememberDevice: "" });
+  const [credentials, setCredentials] = useState({
+     email: "",
+      password: "",
+       rememberDevice: "" });
   const [showPassword, setShowPassword] = useState(false);
 
 
@@ -26,12 +29,14 @@ const Login = () => {
  const handleSubmit = async (e) => {
   e.preventDefault();
 
+  const { email, password, rememberDevice } = credentials;
+
     const response = await fetch("http://localhost:5000/api/users/login", {
       method: "POST",
         credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email, password, rememberDevice
+        email, password, rememberDevice,
       }),
     });
  const data = await response.json();
@@ -60,7 +65,10 @@ document.cookie = `jwt=${token}; path=/; max-age=${24 * 60 * 60};`;
 };
 
 // Check session every 10 minutes
-setInterval(checkSessionExpiration, 10 * 60 * 1000);
+useEffect(() => {
+  const interval = setInterval(checkSessionExpiration, 10 * 60 * 1000);
+  return () => clearInterval(interval);
+}, []);
 
   return (
     <div className="login-container">
@@ -98,9 +106,9 @@ setInterval(checkSessionExpiration, 10 * 60 * 1000);
             <input
               type="checkbox"
               name="rememberDevice"
-              checked={credentials.remember || false}
+              checked={credentials.rememberDevice || false}
               onChange={(e) =>
-                setCredentials({ ...credentials, remember: e.target.checked })
+                setCredentials({ ...credentials, rememberDevice: e.target.checked })
               }
             />
             Remember Me
