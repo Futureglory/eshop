@@ -26,10 +26,10 @@ getUserDetails,
 } = require("../controllers/userController");
 // --------- AUTHENTICATION ROUTES ---------
 router.post("/signup", authController.signup);
-router.post("/login", authController.loginUser);
+router.post("/login", loginUser);
 router.post("/logout", authMiddleware, authController.logout);
 
-router.post("/otp", authController.verifyOtp);
+router.post("/verifyOtp", verifyOtp);
 router.post("/resend-otp", authController.resendOtp);
 
 // --------- PASSWORD RESET ---------
@@ -40,6 +40,6 @@ router.post("/reset-password", resetPassword);
 router.get("/profile", authMiddleware, userController.getUserDetails); // basic profile data
 router.put("/profile/update", authMiddleware, upload.single("avatar"), userController.updateUserProfile); // with avatar
 router.put("/profile/password", authMiddleware, userController.updatePassword); // update password
-
+router.get("/profile", authMiddleware, getUserProfile);
 
 module.exports = router;

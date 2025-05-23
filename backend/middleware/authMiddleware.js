@@ -1,70 +1,44 @@
 const jwt = require("jsonwebtoken");
 const { User } = require("../models");
 
-// Middleware for checking JWT and token blacklist
 const authMiddleware = async (req, res, next) => {
   const token = req.cookies.jwt;
 
   if (!token) {
-    return res.status(403).json({ message: "No token provided." });
+    return res.status(401).json({ message: "Unauthorized. Please log in." });
   }
 
   try {
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-    
+    // ✅ Verify JWT
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+      if (err) {
+        return res.status(403).json({ message: "Invalid session. Please log in again." });
+      }
+      return decodedToken;
+    });
 
-     // ✅ Ensure `decoded.exp` exists before checking expiration
+    // ✅ Ensure expiration check is applied
     if (decoded.exp && Date.now() >= decoded.exp * 1000) {
       res.clearCookie("jwt");
       return res.status(401).json({ message: "Session expired, please log in again." });
     }
 
-      if (!decoded.email) {
+    if (!decoded.email) {
       return res.status(400).json({ message: "Invalid token structure." });
     }
 
-
-       const user = await User.findOne({ where: { email: decoded.email }, attributes: ["id", "username", "email"] });
+    // ✅ Look up the user in the database
+    const user = await User.findOne({ where: { email: decoded.email }, attributes: ["id", "username", "email"] });
 
     if (!user) {
       return res.status(404).json({ message: "User not found." });
     }
 
-    req.user = user; // Attach decoded user data
+    req.user = user; // ✅ Attach verified user to request object
     next();
   } catch (error) {
     return res.status(401).json({ message: "Invalid token, please log in again." });
   }
 };
 
-// Middleware for protecting routes (with user lookup)
-// const protect = async (req, res, next) => {
-//   const token = req.cookies.jwt;
-
-//   if (!token) {
-//     return res.status(401).json({ message: "Not authorized, no token." });
-//   }
-
-//   if (blacklist.has(token)) {
-//     return res.status(401).json({ message: "Token has been blacklisted." });
-//   }
-
-//   try {
-//     const decoded = jwt.verify(token, process.env.JWT_SECRET);
-//     const user = await User.findByPk(decoded.id);
-
-//     if (!user) {
-//       return res.status(404).json({ message: "User not found." });
-//     }
-
-//     req.user = user;
-//     next();
-//   } catch (err) {
-//     return res.status(401).json({ message: "Not authorized, token failed." });
-//   }
-// };
-
-
-// Export both middlewares and the blacklist (if needed in logout)
-module.exports =
-  authMiddleware;
+module.exports = authMiddleware;

@@ -1339,9 +1339,48 @@ h1 {
 
 
 
+/*cart*/
 
+.cart-container {
+  width: 80%;
+  margin: auto;
+  padding: 20px;
+  text-align: center;
+}
 
+.cart-list {
+  list-style: none;
+  padding: 0;
+}
 
+.cart-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px;
+  border-bottom: 1px solid #ddd;
+}
+
+.cart-image {
+  width: 100px;
+  height: auto;
+}
+
+.cart-details {
+  flex-grow: 1;
+  padding: 10px;
+}
+
+.checkout-btn {
+  margin-top: 20px;
+  padding: 10px 20px;
+  background-color:  #FBBF24;
+  color: white;
+  font-size: 16px;
+  cursor: pointer;
+  border: none;
+  border-radius: 5px;
+}
 
 
 

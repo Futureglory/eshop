@@ -40,7 +40,10 @@ module.exports = (sequelize, DataTypes) => {
     trustedDevices: { type: DataTypes.JSON }, // ✅ Stores trusted devices
     loginVerificationToken: { type: DataTypes.STRING },
     loginVerificationTokenExpiresAt: { type: DataTypes.DATE },
-
+firstLogin: {
+  type: Boolean,
+  default: true, // ✅ New users will skip verification initially
+},
   }, {
     timestamps: true,
   });

@@ -22,10 +22,16 @@ exports.getUserProfile = async (req, res) => {
     const token = req.cookies.jwt;
     if (!token) return res.status(401).json({ message: "No token provided" });
 
-    const decoded = jwt.verify(token, process.env.JWT_SECRET);
-   if (!decoded.email) return res.status(400).json({ message: "Invalid token structure." });
+    const decoded = jwt.verify(token, process.env.JWT_SECRET, (err, decodedToken) => {
+      if (err) {
+        return res.status(403).json({ message: "Invalid or expired session. Please log in again." });
+      }
+      return decodedToken;
+    });
 
-    const user = await  User.findOne({
+    if (!decoded.email) return res.status(400).json({ message: "Invalid token structure." });
+
+    const user = await User.findOne({
       where: { email: decoded.email },
       attributes: ["id", "username", "email", "isVerified"]
     });
@@ -34,8 +40,8 @@ exports.getUserProfile = async (req, res) => {
 
     res.status(200).json({ user });
   } catch (err) {
-    console.error(err);
-    res.status(401).json({ message: "Invalid token" });
+    console.error("Profile fetch error:", err);
+    res.status(500).json({ message: "Server error. Please try again later." });
   }
 };
 

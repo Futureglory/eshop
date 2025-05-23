@@ -36,13 +36,12 @@ exports.signup = async (req, res) => {
 
     const user = await User.create({
       username,
-      email: emailtoLowercase(),
+      email,
       password: hashedPassword,
       otp,
       otpExpiresAt,
       isVerified: false,
     });
-    await User.update({ otp, otpExpiresAt }, { where: { email } });
 
     await sendAccountCreatedEmail(user);
 
@@ -51,17 +50,20 @@ exports.signup = async (req, res) => {
       "verify Your Account",
       `<p>Your OTP is: <b>${otp}</b>. It will expire in 10 minutes.</p>`
     );
+
+
     res.status(201).json({ message: "Signup successful. Check your email for the OTP." });
   } catch (err) {
     console.error("signup error", err);
     res.status(500).json({ message: "Server error" });
   }
 
+
 };
 
 exports.verifyOtp = async (req, res) => {
   try {
- const email = req.query.email?.toLowerCase(); // 👈 Normalizes email from URL
+    const { email } = req.body; // 👈 Normalizes email from URL
     const { otp } = req.body;
 
     if (!email || !otp) {
@@ -69,13 +71,20 @@ exports.verifyOtp = async (req, res) => {
     }
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(404).json({ message: "User not found" });
-    if (user.otpExpiresAt < new Date()) {
-      return res.status(400).json({ message: " OTP is expired, please request for a new one." });
+
+    if (!user.otpExpiresAt) {
+      return res.status(400).json({ message: "No OTP set for this account." });
     }
-    if (!user.otpExpiresAt || new Date(user.otpExpiresAt) < new Date()) {
+
+    const now = new Date();
+    console.log("Current time:", now.toISOString());;
+    console.log("OTP expires at:", new Date(user.otpExpiresAt).toISOString());
+
+    if (new Date(user.otpExpiresAt) < now) {
       return res.status(400).json({ message: "OTP expired, please request a new one." });
     }
-    if (String(user.otp !== otp)) {
+
+    if (String(user.otp) !== String(otp)) {
       return res.status(400).json({ message: "Incorrect OTP. Please try again." });
     }
 
@@ -118,53 +127,59 @@ exports.resendOtp = async (req, res) => {
 exports.loginUser = async (req, res) => {
   try {
     const { email, password, rememberDevice } = req.body;
-    const userAgent = req.headers["user-agent"]; // ✅ Get user device info
-    const ipAddress = req.ip; // ✅ Get user's IP address
+    const userAgent = req.headers["user-agent"];
+    const ipAddress = req.ip;
 
     if (!email || !password) {
       return res.status(400).json({ message: "Email and password required" });
     }
+
     const user = await User.findOne({ where: { email } });
     if (!user) return res.status(404).json({ message: "User not found" });
 
-    const isMatch = await bcrypt.compare(password, user.password);
-    if (!isMatch) { return res.status(401).json({ message: "Invalid email or password" }); }
-
-    if (!user.isVerified) { return res.status(401).json({ message: "Please verify your email first" }); }
-
-    const generateVerificationToken = () => crypto.randomBytes(32).toString("hex");
-
-    if (!isTrustedDevice && rememberDevice) {
-      user.trustedDevices = [...(user.trustedDevices || []), { userAgent, ip: ipAddress }];
-
-      const exists = user.trustedDevices.some(d => d.userAgent === userAgent && d.ip === ipAddress);
-      if (!exists) {
-        user.trustedDevices.push({ userAgent, ip: ipAddress });
-
-      }
-      const verificationToken = generateVerificationToken();
-      user.loginVerificationToken = verificationToken;
-      if (
-        !user ||
-        !user.loginVerificationTokenExpiresAt ||
-        user.loginVerificationTokenExpiresAt < new Date()
-      ) {
-        return res.status(400).json({ message: "Invalid or expired verification token" });
-      }
-      await user.save();
-
-      await sendEmail(
-        email,
-        "New Login Attempt Detected",
-        `<p>We've detected a login attempt from a new device or location.</p>
-         <p>If this was you, click below to verify your login:</p>
-         <a href="http://localhost:3000/verify-login?token=${verificationToken}">Verify Login</a>
-         <p>If this wasn't you, please secure your account immediately.</p>`
-      );
-
-      return res.status(403).json({ message: "New login detected. Please verify via email." });
+    if (!user.isVerified) {
+      return res.status(401).json({ message: "Please verify your email first" });
     }
 
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.status(401).json({ message: "Invalid email or password" });
+    }
+
+    // ✅ Allow first login without verification
+    if (user.firstLogin) {
+      user.firstLogin = false; // ✅ Disable future auto-login
+      await user.save();
+    } else {
+      // ✅ Require verification if logging in from a new device
+      const isTrustedDevice = user.trustedDevices?.some(device => 
+        device.userAgent === userAgent && device.ip === ipAddress
+      );
+
+      if (!isTrustedDevice && rememberDevice) {
+        user.trustedDevices = [...(user.trustedDevices || []), { userAgent, ip: ipAddress }];
+
+        const verificationToken = Math.random().toString(36).substring(2, 12);
+        user.loginVerificationToken = verificationToken;
+        user.loginVerificationTokenExpiresAt = new Date(Date.now() + 10 * 60 * 1000);
+
+        await user.save();
+
+        const frontendURL = process.env.FRONTEND_URL || "http://your-public-domain.com";
+        await sendEmail(
+          email,
+          "New Login Attempt Detected",
+          `<p>We've detected a login attempt from a new device or location.</p>
+          <p>If this was you, click below to verify your login:</p>
+          <a href="${frontendURL}/verify-login?token=${verificationToken}">Verify Login</a>
+          <p>If this wasn't you, please secure your account immediately.</p>`
+        );
+
+        return res.status(403).json({ message: "New login detected. Please verify via email." });
+      }
+    }
+
+    // ✅ Generate authentication token
     const token = jwt.sign({ id: user.id, email: user.email }, process.env.JWT_SECRET, {
       expiresIn: "1d",
     });
@@ -180,7 +195,6 @@ exports.loginUser = async (req, res) => {
     user.lastLoginIp = ipAddress;
     user.lastLoginDevice = userAgent;
 
-
     await user.save();
 
     res.status(200).json({
@@ -191,8 +205,8 @@ exports.loginUser = async (req, res) => {
   } catch (err) {
     console.error("Login error:", err);
     res.status(500).json({ message: "Server error" });
-  };
-}
+  }
+};
 
 exports.verifyLoginAttempt = async (req, res) => {
   try {

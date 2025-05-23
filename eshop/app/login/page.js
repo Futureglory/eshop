@@ -10,9 +10,10 @@ const Login = () => {
   const [error, setError] = useState("");
   const [user, setUser] = useState(null); // Initialize user state to null
   const [credentials, setCredentials] = useState({
-     email: "",
-      password: "",
-       rememberDevice: "" });
+    email: "",
+    password: "",
+    rememberDevice: ""
+  });
   const [showPassword, setShowPassword] = useState(false);
 
 
@@ -26,49 +27,50 @@ const Login = () => {
 
   const togglePassword = () => setShowPassword(!showPassword);
 
- const handleSubmit = async (e) => {
-  e.preventDefault();
+  const handleSubmit = async (e) => {
+    e.preventDefault();
 
-  const { email, password, rememberDevice } = credentials;
+    const { email, password, rememberDevice } = credentials;
 
     const response = await fetch("http://localhost:5000/api/users/login", {
       method: "POST",
-        credentials: "include",
+      credentials: "include",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        email, password, rememberDevice,
+        email, password, rememberDevice
       }),
     });
- const data = await response.json();
+    const data = await response.json();
+  console.log("Login Response:", data);
 
-  if (response.ok) {
-    console.log("Login successful:", data);
-    window.location.href = "/home"; // ✅ Redirects to home page
-  } else {
-    console.error("Login failed:", data.message);
-  }
-};
+    if (response.ok) {
+      console.log("Login successful:", data);
+      window.location.href = "/"; // ✅ Redirects to home page
+    } else {
+      console.error("Login failed:", data.message);
+    }
+  };
 
-const checkSessionExpiration = async () => {
-  const response = await fetch("http://localhost:5000/api/users/profile", {
-    method: "GET",
-    credentials: "include",
-  });
+  const checkSessionExpiration = async () => {
+    const response = await fetch("http://localhost:5000/api/users/profile", {
+      method: "GET",
+      credentials: "include",
+    });
 
-  const data = await response.json();
+    const data = await response.json();
 
-  if (response.status === 401) {
-    alert("Session expired. Please log in again.");
-document.cookie = `jwt=${token}; path=/; max-age=${24 * 60 * 60};`;
-    window.location.href = "/login"; // Redirect to login page
-  }
-};
+    if (response.status === 401) {
+      alert("Session expired. Please log in again.");
+      document.cookie = `jwt=${token}; path=/; max-age=${24 * 60 * 60};`;
+      window.location.href = "/login"; // Redirect to login page
+    }
+  };
 
-// Check session every 10 minutes
-useEffect(() => {
-  const interval = setInterval(checkSessionExpiration, 10 * 60 * 1000);
-  return () => clearInterval(interval);
-}, []);
+  // Check session every 10 minutes
+  useEffect(() => {
+    const interval = setInterval(checkSessionExpiration, 10 * 60 * 1000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <div className="login-container">
