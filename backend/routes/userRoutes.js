@@ -22,7 +22,8 @@ getUserDetails,
   updateUserProfile,
   updatePassword,
   sendProfileUpdateEmail,
-  sendPasswordUpdateEmail
+  sendPasswordUpdateEmail,
+  getUserProfile
 } = require("../controllers/userController");
 // --------- AUTHENTICATION ROUTES ---------
 router.post("/signup", authController.signup);

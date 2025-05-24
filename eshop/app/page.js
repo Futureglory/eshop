@@ -1,98 +1,134 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useEffect, useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { useAuth } from "./hooks/useAuth";
 import { useTheme } from 'next-themes';
 import Hero from './components/Hero';
 import { FiSun, FiMoon } from "react-icons/fi";
-import NavBar from './components/NavBar'
-import ThemeToggle from './components/ThemeToggle';
+import NavBar from './components/NavBar';
 import ProductShowcase from './components/ProductShowcase';
 import { CartProvider } from './context/CartContext';
 import Link from "next/link";
-// import { ThemeContext } from './context/Themecontext';
 
 export default function Home() {
-    const [user, setUser] = useState(null);
-  const { isAuthenticated } = useAuth();
+  const [user, setUser] = useState(null);
+  const [sessionLoading, setSessionLoading] = useState(true);
   const [mounted, setMounted] = useState(false);
+  const { isAuthenticated } = useAuth();
   const { theme, setTheme } = useTheme();
   const router = useRouter();
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push("/dashboard");
-    }
-  }, [isAuthenticated]);
+  // Fetch user session
+  const fetchUserSession = useCallback(async () => {
+    try {
+      setSessionLoading(true);
+      const response = await fetch("http://localhost:5000/api/users/profile", {
+        method: "GET",
+        credentials: "include",
+      });
 
+      if (response.ok) {
+        const data = await response.json();
+        setUser(data.user || data);
+      } else {
+        setUser(null);
+      }
+    } catch (error) {
+      console.error("Session fetch error:", error);
+      setUser(null);
+    } finally {
+      setSessionLoading(false);
+    }
+  }, []);
+
+  // Check session on mount
+  useEffect(() => {
+    fetchUserSession();
+  }, [fetchUserSession]);
+
+  // Handle authentication redirect
+ useEffect(() => {
+    if (isAuthenticated && user) {
+      router.push("/profile");
+    }
+  }, [isAuthenticated, user, router]);
+
+
+  // Handle theme mounting
   useEffect(() => setMounted(true), []);
-  if (!mounted) return null;
 
   const toggleTheme = () => {
     setTheme(theme === 'light' ? 'dark' : 'light');
   };
 
-const fetchUserSession = async () => {
-  const response = await fetch("http://localhost:5000/api/users/profile", {
-    method: "GET",
-    credentials: "include", // ✅ Ensures cookies are sent
-  });
-
-  const data = await response.json();
-
-  if (response.ok) {
-    console.log("Session active:", data.user); // ✅ Get user details
-  } else {
-    console.error("Session expired or invalid:", data.message);
-    window.location.href = "/login"; // Redirect to login if session is invalid
-  }
-};
-
-// Call function on page load
-fetchUserSession();
+  if (!mounted) return null;
 
   return (
-
     <CartProvider>
       <div className="landing-container">
-        <span className="banner">
+        <header className="banner">
+
           <h1 className="title">Eshop</h1>
           <p className="subtitle">Wear Confidence. Own Your Style.</p>
-          <div className="buttons">
-            {!user && (
-              <>
+
+          <div className="hero-actions">
+            {!sessionLoading && !user && (
+              <div className="auth-buttons">
                 <Link href="/signup">
-                  <button className="signupButton">Sign Up</button>
+                  <button className="signup-button">Sign Up</button>
                 </Link>
                 <Link href="/login">
-                  <button className="loginButton">Log In</button>
+                  <button className="login-button">Log In</button>
                 </Link>
-              </>
+              </div>
             )}
-            <button onClick={toggleTheme} className="themeToggle">
-              {theme === "light" ? <FiMoon size={18} /> : <FiSun size={18} />}
+
+            <button
+              onClick={toggleTheme}
+              className="themeToggle"
+              aria-label="Toggle theme"
+            >
+              {theme === "light" ? <FiMoon size={20} /> : <FiSun size={20} />}
             </button>
           </div>
-        </span>
+        </header>
 
         <NavBar />
-        {/* <Hero />
-        <ProductShowcase /> */}
 
+        {/* <main className="main-content">
+          <Hero />
+          <ProductShowcase />
+        </main> */}
 
-
-
-
-
-
-        {/* <footer className="footer">
-          <p>&copy; 2023 Eshop. All rights reserved.</p>
-          <Link href="/privacy-policy">Privacy Policy</Link>
-          <Link href="/terms-of-service">Terms of Service</Link>
-          <Link href="/contact">Contact Us</Link>
+        {/* <footer className="site-footer">
+          <div className="footer-content">
+            <div className="footer-section">
+              <h3>Quick Links</h3>
+              <Link href="/about">About Us</Link>
+              <Link href="/contact">Contact</Link>
+              <Link href="/faq">FAQ</Link>
+            </div>
+            
+            <div className="footer-section">
+              <h3>Legal</h3>
+              <Link href="/privacy-policy">Privacy Policy</Link>
+              <Link href="/terms-of-service">Terms of Service</Link>
+              <Link href="/returns">Returns Policy</Link>
+            </div>
+            
+            <div className="footer-section">
+              <h3>Support</h3>
+              <Link href="/help">Help Center</Link>
+              <Link href="/shipping">Shipping Info</Link>
+              <Link href="/size-guide">Size Guide</Link>
+            </div>
+          </div>
+          
+          <div className="footer-bottom">
+            <p>&copy; 2024 Eshop. All rights reserved.</p>
+          </div>
         </footer> */}
-      </div >
-    </CartProvider >
+      </div>
+    </CartProvider>
   );
-
-}
+};

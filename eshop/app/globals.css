@@ -721,7 +721,9 @@ MARGIN-LEFT:7%;
 .hamburger:hover{
   color: #FFD700;
 }
-
+.dropdown-trigger{
+  background-color:transparent;
+}
 .searchContainer {
   position: relative;
 }
@@ -1480,6 +1482,9 @@ body {
   border-radius: 4px;
   text-decoration: none;
   /* transition: background-color 0.3s ease; */
+}
+.auth-buttons{
+  background-color: transparent;
 }
 .signupButton:hover,
 .loginButton:hover
