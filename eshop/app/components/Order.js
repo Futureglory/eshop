@@ -3,60 +3,8 @@ import { Package, Truck, CheckCircle, XCircle, Clock, Calendar, Filter, Shopping
 
 const OrderManagementSystem = () => {
   // Mock database - in real app, this would be in your backend
-  const [orders, setOrders] = useState([
-    {
-      id: 'ORD-2024-001',
-      date: '2024-05-20',
-      status: 'delivered',
-      total: 159.99,
-      items: [
-        { id: 1, name: 'Wireless Headphones', price: 89.99, quantity: 1, image: '/api/placeholder/60/60' },
-        { id: 2, name: 'Phone Case', price: 29.99, quantity: 2, image: '/api/placeholder/60/60' }
-      ],
-      shippingAddress: '123 Main St, City, State 12345',
-      estimatedDelivery: '2024-05-22',
-      actualDelivery: '2024-05-21',
-      trackingNumber: 'TRK123456789'
-    },
-    {
-      id: 'ORD-2024-002',
-      date: '2024-05-23',
-      status: 'processing',
-      total: 249.50,
-      items: [
-        { id: 3, name: 'Laptop Stand', price: 79.99, quantity: 1, image: '/api/placeholder/60/60' },
-        { id: 4, name: 'USB Hub', price: 49.99, quantity: 2, image: '/api/placeholder/60/60' },
-        { id: 5, name: 'Wireless Mouse', price: 69.53, quantity: 1, image: '/api/placeholder/60/60' }
-      ],
-      shippingAddress: '456 Oak Ave, Town, State 67890',
-      estimatedDelivery: '2024-05-28',
-      trackingNumber: 'TRK987654321'
-    },
-    {
-      id: 'ORD-2024-003',
-      date: '2024-05-24',
-      status: 'shipped',
-      total: 89.99,
-      items: [
-        { id: 6, name: 'Bluetooth Speaker', price: 89.99, quantity: 1, image: '/api/placeholder/60/60' }
-      ],
-      shippingAddress: '789 Pine St, Village, State 13579',
-      estimatedDelivery: '2024-05-26',
-      trackingNumber: 'TRK456789123'
-    },
-    {
-      id: 'ORD-2024-004',
-      date: '2024-05-15',
-      status: 'canceled',
-      total: 199.99,
-      items: [
-        { id: 7, name: 'Smart Watch', price: 199.99, quantity: 1, image: '/api/placeholder/60/60' }
-      ],
-      shippingAddress: '321 Elm St, Borough, State 24680',
-      estimatedDelivery: null,
-      cancelReason: 'Customer requested cancellation'
-    }
-  ]);
+const [orders, setOrders] = useState([]);
+
 
   const [filterStatus, setFilterStatus] = useState('all');
   const [selectedOrder, setSelectedOrder] = useState(null);
@@ -96,10 +44,9 @@ const OrderManagementSystem = () => {
   const fetchOrders = async () => {
     setLoading(true);
     try {
-      // Replace with actual API call
-      // const response = await fetch('/api/orders');
-      // const data = await response.json();
-      // setOrders(data);
+    const response = await fetch(`http://localhost:5000/api/orders/${userEmail}`);
+      const data = await response.json();
+      setOrders(data);
       
       // Mock delay
       setTimeout(() => {
@@ -107,7 +54,8 @@ const OrderManagementSystem = () => {
       }, 1000);
     } catch (error) {
       console.error('Error fetching orders:', error);
-      setLoading(false);
+    }finally{
+            setLoading(false);
     }
   };
 
