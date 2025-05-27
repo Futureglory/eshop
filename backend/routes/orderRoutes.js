@@ -1,19 +1,18 @@
 const express = require('express');
 const router = express.Router();
 const {
-  getOrders,
-  getOrderByEmail,
-  reorderItems
+  getOrdersByEmail,
+  reorderItems,
+  getOrdersByEmailAndStatus,
+placeOrder
 } = require('../controllers/orderController');
 const orderController = require('../controllers/orderController');
 
 // GET /api/orders
-router.get('/', getOrders);
+router.post('/checkout', orderController.placeOrder);
+router.get('/:email', orderController.getOrdersByEmail);
+router.get('/:email/:status', orderController.getOrdersByEmailAndStatus);
 
-router.post('/place', orderController.placeOrder);
-
-// GET /api/orders/:id
-router.get('/:email', getOrderByEmail);
 
 // POST /api/orders/reorder
 router.post('/reorder', reorderItems);

@@ -32,7 +32,7 @@ app.use('/api/account', accountRoutes);
 sequelize.authenticate({ } )
   .then(() => {
     console.log("Database connected successfully");
-    return sequelize.sync({ alter: true }); // Set force: true to drop tables on each restart (for development only)
+    return sequelize.sync({ }); // Set force: true to drop tables on each restart (for development only)
   })
   .then(() => {
     app.listen(5000, () => console.log("Server running on port 5000"));

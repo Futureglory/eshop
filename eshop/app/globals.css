@@ -1894,12 +1894,51 @@ body {
 }
 
 
+/* checkout*/
 
+ .checkout-container,
+  .order-summary {
+  max-width: 600px;
+  margin: auto;
+  padding: 20px;
+}
 
+h1 {
+  text-align: center;
+}
 
+.checkout-container form {
+  display: flex;
+  flex-direction: column;
+}
 
+.checkout-container input {
+  margin-bottom: 10px;
+  padding: 8px;
+  border: 1px solid #ddd;
+}
 
+.checkout-container button {
+  background: #007bff;
+  color: white;
+  border: none;
+  padding: 10px;
+}
+.checkout-container button:hover {
+  background: #0056b3;
+}
+.checkout-container select {
+  width: 100%;
+  padding: 10px;
+  margin-bottom: 15px;
+  border: 1px solid #ddd;
+}
 
+.checkout-container button:hover {
+  background: #0056b3;
+}
+
+/* Order Summary */
 
 
 

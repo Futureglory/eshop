@@ -1,23 +1,34 @@
 const { Sequelize, DataTypes } = require('sequelize');
 const sequelize = require('../config/database');
 
+module.exports = (sequelize, DataTypes) => {
   const Order = sequelize.define('Order', {
-    email: DataTypes.STRING,
-    status: DataTypes.STRING,
-    total: DataTypes.FLOAT,
-    shippingAddress: DataTypes.STRING,
-    estimatedDelivery: DataTypes.DATE,
+    userId: {
+      type: DataTypes.INTEGER,
+      allowNull: false
+    },
+    email: {
+      type: DataTypes.STRING,
+      allowNull: false
+    },
+    status: {
+      type: DataTypes.ENUM('processing', 'shipped', 'delivered', 'cancelled'),
+      defaultValue: 'processing'
+    },
+    total: { type: DataTypes.FLOAT, allowNull: false },
+    shippingAddress: { type: DataTypes.STRING, allowNull: false },
+    estimatedDelivery: { type: DataTypes.DATE, allowNull: false },
     actualDelivery: DataTypes.DATE,
     trackingNumber: DataTypes.STRING,
     cancelReason: DataTypes.STRING,
-  date: { type: DataTypes.DATE, defaultValue: Sequelize.NOW },
+    paymentStatus: { type: DataTypes.STRING, defaultValue: "Unpaid" },
+    date: {
+      type: DataTypes.DATE,
+      defaultValue: Sequelize.literal('CURRENT_TIMESTAMP')
+    },
   });
-
-  Order.associate = models => {
-    Order.hasMany(models.OrderItem, { foreignKey: 'orderId', as: 'items' });
-  };
 
   return Order;
 
-module.exports = Order;
+};
 

@@ -6,15 +6,21 @@ const Order = require("./Order");
 const OrderItem = require("./OrderItem");
 
 const db = {};
-db.Seqbuelize = Sequelize;
+db.Sequelize = Sequelize;
 db.sequelize = sequelize;
 db.User = User;
 
-const models = { Order, OrderItem };
+db.User = require('./User')(sequelize, Sequelize.DataTypes);
+db.Order = require('./Order')(sequelize, Sequelize.DataTypes);
+db.OrderItem = require('./OrderItem')(sequelize, Sequelize.DataTypes);
 
-    Order.hasMany(models.OrderItem, { foreignKey: 'orderId', as: 'items' });
-    OrderItem.belongsTo(models.Order, { foreignKey: 'orderId' });
 
+// Associations
+db.User.hasMany(db.Order, { foreignKey: 'userId' });
+db.Order.belongsTo(db.User, { foreignKey: 'userId' });
+
+db.Order.hasMany(db.OrderItem, { foreignKey: 'orderId', as: 'items' });
+db.OrderItem.belongsTo(db.Order, { foreignKey: 'orderId' });
 
 db.User = require("./User")(sequelize, Sequelize.DataTypes); // ✅ initializes the model
 
