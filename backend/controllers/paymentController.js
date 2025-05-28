@@ -51,3 +51,36 @@ exports.verifyPayment = async (req, res) => {
     res.status(500).json({ message: "Server error while verifying payment." });
   }
 };
+const Flutterwave = require("flutterwave-node-v3");
+const flw = new Flutterwave(process.env.FLW_PUBLIC_KEY, process.env.FLW_SECRET_KEY);
+
+exports.initiatePayment = async (req, res) => {
+  try {
+    const { userId, orderId, paymentMethod, amount } = req.body;
+
+    let paymentData = {};
+
+    if (paymentMethod === "Card") {
+      paymentData = {
+        tx_ref: `TX-${Date.now()}`,
+        amount,
+        currency: "NGN",
+        payment_type: "card",
+        redirect_url: "http://localhost:3000/order-summary",
+      };
+    } else if (paymentMethod === "Bank Transfer") {
+      paymentData = {
+        tx_ref: `TX-${Date.now()}`,
+        amount,
+        currency: "NGN",
+        payment_type: "bank_transfer",
+      };
+    }
+
+    const response = await flw.PaymentInitiation(paymentData);
+    res.status(200).json({ message: "Payment initiated", data: response });
+  } catch (error) {
+    console.error("Payment error:", error);
+    res.status(500).json({ message: "Error processing payment" });
+  }
+};

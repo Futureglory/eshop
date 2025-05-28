@@ -7,6 +7,7 @@ const Transaction = sequelize.define("Transaction", {
   paymentMethod: { type: DataTypes.STRING, allowNull: false }, // "Bank Transfer" or "Card"
   amount: { type: DataTypes.FLOAT, allowNull: false },
   status: { type: DataTypes.STRING, defaultValue: "Pending" },
+  verificationStatus: { type: DataTypes.STRING, defaultValue: "Unverified" },
 });
 
 module.exports = Transaction;

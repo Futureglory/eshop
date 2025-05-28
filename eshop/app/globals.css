@@ -1919,14 +1919,12 @@ h1 {
 }
 
 .checkout-container button {
-  background: #007bff;
+  background:#ffc400;
   color: white;
   border: none;
   padding: 10px;
 }
-.checkout-container button:hover {
-  background: #0056b3;
-}
+
 .checkout-container select {
   width: 100%;
   padding: 10px;
@@ -1941,7 +1939,25 @@ h1 {
 /* Order Summary */
 
 
+.order-summary p {
+  font-weight: bold;
+  color: #333;
+}
 
+.order-summary p.failed {
+  color: red;
+}
+
+.order-summary p.verified {
+  color: green;
+}
+
+.title{
+  font-size: 300px;
+}
+.subtitle{
+  margin:auto;
+}
 
 
 
